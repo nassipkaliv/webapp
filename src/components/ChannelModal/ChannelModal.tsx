@@ -15,7 +15,7 @@ function ChannelModal({ onClose }: ChannelModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[10px] py-[20px] max-w-[350px] w-full flex flex-col items-center max-h-[80vh]"
+        className="bg-[#373737] rounded-[20px] p-[10px] py-[20px] max-w-[350px] w-full flex flex-col items-center max-h-[70vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-[117px] h-[117px] rounded-[29px] overflow-hidden shrink-0 mb-3">

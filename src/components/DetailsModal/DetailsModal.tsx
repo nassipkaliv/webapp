@@ -9,7 +9,7 @@ function DetailsModal({ onClose }: DetailsModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[10px] max-w-[350px] w-full flex flex-col gap-5 max-h-[80vh]"
+        className="bg-[#373737] rounded-[20px] p-[10px] max-w-[350px] w-full flex flex-col gap-5 max-h-[70vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex-1 overflow-y-auto min-h-0 px-3 py-3">

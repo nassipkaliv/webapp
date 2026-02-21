@@ -14,7 +14,7 @@ function WithdrawPage({ balance, onTabChange, sponsorUnlocked }: WithdrawPagePro
 
   return (
     <div className="h-dvh flex flex-col relative bg-gradient-to-b from-black to-[#b42115] overflow-hidden">
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-[calc(105px+env(safe-area-inset-bottom,0px))] relative z-[1] gap-6">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-[calc(90px+env(safe-area-inset-bottom,0px))] relative z-[1] gap-6">
         <h1 className="font-inter font-medium text-[40px] leading-[38%] text-center text-white">
           Ваш баланс
         </h1>

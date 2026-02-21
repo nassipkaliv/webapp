@@ -109,7 +109,7 @@ function SponsorPage({ onTabChange }: SponsorPageProps) {
 
   return (
     <div className="h-dvh flex flex-col relative bg-gradient-to-b from-black to-[#b42115]">
-      <main className="flex-1 flex flex-col px-4 pt-4 pb-[calc(105px+env(safe-area-inset-bottom,0px))] relative z-[1] overflow-y-auto">
+      <main className="flex-1 flex flex-col px-4 pt-4 pb-[calc(90px+env(safe-area-inset-bottom,0px))] relative z-[1] overflow-y-auto">
         {/* Header */}
         <div className="relative flex items-center justify-between mb-4 mt-5 shrink-0">
           <button

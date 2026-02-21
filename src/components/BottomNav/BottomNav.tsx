@@ -64,7 +64,7 @@ function BottomNav({ activeTab, onTabChange, sponsorUnlocked }: BottomNavProps) 
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 max-w-[430px] mx-auto flex justify-center items-center gap-[50px] h-[105px] bg-[#130402] pb-[env(safe-area-inset-bottom,0px)] z-[100]">
+    <nav className="fixed bottom-0 inset-x-0 max-w-[430px] mx-auto flex justify-center items-center gap-[50px] h-[90px] bg-[#130402] pb-[env(safe-area-inset-bottom,0px)] z-[100]">
       {tabs.map(({ id, label, Icon, badge }) => {
         const isActive = activeTab === id;
         return (

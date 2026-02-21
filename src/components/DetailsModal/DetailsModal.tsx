@@ -12,17 +12,17 @@ function DetailsModal({ onClose }: DetailsModalProps) {
         className="bg-[#373737] rounded-[20px] p-[10px] max-w-[350px] w-full flex flex-col gap-5 max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex-1 overflow-y-auto px-3 py-3">
+        <div className="flex-1 overflow-y-auto min-h-0 px-3 py-3">
           <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center">
             Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance.
           </p>
-          <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-3">
+          <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-2">
             All investments carry a certain level of risk, which is why careful analysis and a balanced approach are important. Many investors focus on long-term strategies, diversification, and consistent evaluation rather than short-term results.
           </p>
           <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-3">
             Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance. Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance.
           </p>
-          <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-3">
+          <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-2">
             All investments carry a certain level of risk, which is why careful analysis and a balanced approach are important.
           </p>
         </div>

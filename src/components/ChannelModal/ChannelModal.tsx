@@ -30,14 +30,14 @@ function ChannelModal({ onClose }: ChannelModalProps) {
           Имя актера
         </span>
 
-        <div className="flex-1 overflow-y-auto px-3">
+        <div className="flex-1 overflow-y-auto min-h-0 px-3">
           <h3 className="font-inter font-semibold text-[20px] text-[#a6a6a6] leading-[110%] text-center mb-3">
             Understanding Investment Fundamentals
           </h3>
           <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center">
             Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance.
           </p>
-          <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-3">
+          <p className="font-inter font-semibold text-[14px] text-[#a6a6a6] leading-[129%] text-center mt-2">
             All investments carry a certain level of risk, which is why careful analysis and a balanced approach are important. Many investors focus on long-term strategies, diversification, and consistent evaluation rather than short-term results.
           </p>
         </div>

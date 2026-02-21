@@ -1,0 +1,81 @@
+{
+  "currency": "EUR",
+
+  "nav": {
+    "home": "HOME",
+    "withdraw": "ВЫВОД",
+    "sponsor": "СПОНСОР"
+  },
+
+  "home": {
+    "euroCoinAlt": "Euro coin"
+  },
+
+  "withdraw": {
+    "title": "Ваш баланс",
+    "buttonText": "Вывод средств",
+    "euroCoinAlt": "Euro coin"
+  },
+
+  "sponsor": {
+    "channelName": "Название канала",
+    "subscribers": "10422 подписчика",
+    "channelAvatarAlt": "Channel avatar"
+  },
+
+  "post": {
+    "title": "Welcome to Our Platform",
+    "description": "We create modern digital solutions that help users navigate easily, make informed decisions, and enjoy a convenient online experience.",
+    "whyTitle": "Why Choose Us",
+    "whyItems": [
+      "Clear and user-friendly interface",
+      "Access from any device",
+      "Fast registration and quick start",
+      "User support available 24/7"
+    ],
+    "detailsButton": "ПОДРОБНЕЕ",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "instagram": "Instagram",
+    "postImageAlt": "Post"
+  },
+
+  "energyModal": {
+    "title": "Больше энергии от 50 до 100 ⚡",
+    "description": "Разблокируйте блог спонсора и получите возможность зарабатывать в 2 раза больше денег!",
+    "unlockButton": "Разблокировать",
+    "sponsorAlt": "Sponsor"
+  },
+
+  "withdrawModal": {
+    "title": "Вывод средств",
+    "inputPlaceholder": "Сумма (EUR)",
+    "submitButton": "Вывести",
+    "error": "Минимальный вывод от 1000 евро. Перейдите в раздел спонсор, чтобы заработать ещё больше!"
+  },
+
+  "detailsModal": {
+    "text1": "Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance.",
+    "text2": "All investments carry a certain level of risk, which is why careful analysis and a balanced approach are important. Many investors focus on long-term strategies, diversification, and consistent evaluation rather than short-term results.",
+    "text3": "Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance. Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance.",
+    "text4": "All investments carry a certain level of risk, which is why careful analysis and a balanced approach are important.",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "instagram": "Instagram"
+  },
+
+  "channelModal": {
+    "actorName": "Имя актера",
+    "title": "Understanding Investment Fundamentals",
+    "text1": "Investing is a way to allocate capital with the goal of potential growth over time. It involves placing funds into different assets such as financial markets, real estate, or innovative projects, depending on individual goals and risk tolerance.",
+    "text2": "All investments carry a certain level of risk, which is why careful analysis and a balanced approach are important. Many investors focus on long-term strategies, diversification, and consistent evaluation rather than short-term results.",
+    "actorAlt": "Actor",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "instagram": "Instagram"
+  },
+
+  "energyBar": {
+    "addEnergy": "Add energy"
+  }
+}

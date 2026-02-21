@@ -4,6 +4,7 @@ import CoinHero from '../../components/CoinHero/CoinHero';
 import EnergyBar from '../../components/EnergyBar/EnergyBar';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import EnergyModal from '../../components/EnergyModal/EnergyModal';
+import t from '../../locales/ru.json';
 
 interface HomePageProps {
   balance: number;
@@ -24,6 +25,9 @@ function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChan
       setShowModal(true);
       return;
     }
+    try {
+      window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium');
+    } catch {}
     if (navigator.vibrate) navigator.vibrate(15);
     setBalance((prev) => prev + 1);
     setEnergy((prev) => prev - 1);
@@ -31,8 +35,8 @@ function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChan
 
   return (
     <div className="h-dvh flex flex-col relative bg-gradient-to-b from-black to-[#b42115] overflow-hidden">
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-[calc(90px+env(safe-area-inset-bottom,0px))] relative z-[1] gap-10">
-        <BalanceHeader amount={balance.toFixed(2)} currency="EUR" />
+      <main className="flex-1 flex flex-col items-center justify-center px-[clamp(12px,4vw,40px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1] gap-[clamp(24px,3vw,48px)]">
+        <BalanceHeader amount={balance.toFixed(2)} currency={t.currency} />
         <CoinHero onTap={handleCoinTap} />
         <EnergyBar current={energy} max={maxEnergy} fillPercent={(energy / maxEnergy) * 50} onPlusClick={() => setShowModal(true)} />
       </main>

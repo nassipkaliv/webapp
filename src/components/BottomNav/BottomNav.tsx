@@ -1,3 +1,5 @@
+import t from '../../locales/ru.json';
+
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -58,13 +60,13 @@ const SponsorIcon = () => (
 
 function BottomNav({ activeTab, onTabChange, sponsorUnlocked }: BottomNavProps) {
   const tabs = [
-    ...(sponsorUnlocked ? [{ id: 'sponsor', label: 'СПОНСОР', Icon: SponsorIcon, badge: 85 }] : []),
-    { id: 'home', label: 'HOME', Icon: HomeIcon, badge: undefined },
-    { id: 'withdraw', label: 'ВЫВОД', Icon: WithdrawIcon, badge: undefined },
+    ...(sponsorUnlocked ? [{ id: 'sponsor', label: t.nav.sponsor, Icon: SponsorIcon, badge: 85 }] : []),
+    { id: 'home', label: t.nav.home, Icon: HomeIcon, badge: undefined },
+    { id: 'withdraw', label: t.nav.withdraw, Icon: WithdrawIcon, badge: undefined },
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 max-w-[430px] mx-auto flex justify-center items-center gap-[50px] h-[90px] bg-[#130402] pb-[env(safe-area-inset-bottom,0px)] z-[100]">
+    <nav className="fixed bottom-0 inset-x-0 mx-auto flex justify-center items-center gap-[clamp(30px,10vw,80px)] h-[clamp(70px,18vw,90px)] bg-[#130402] pb-[env(safe-area-inset-bottom,0px)] z-[100]">
       {tabs.map(({ id, label, Icon, badge }) => {
         const isActive = activeTab === id;
         return (
@@ -82,7 +84,7 @@ function BottomNav({ activeTab, onTabChange, sponsorUnlocked }: BottomNavProps) 
                 </span>
               )}
             </div>
-            <span className="font-inter font-bold text-[14px] leading-[107%]">
+            <span className="font-inter font-bold text-[clamp(11px,1.5vw,14px)] leading-[107%]">
               {label}
             </span>
           </button>

@@ -1,4 +1,5 @@
 import channelLogo from '../../assets/channelLogo.png';
+import t from '../../locales/ru.json';
 
 interface EnergyModalProps {
   onClose: () => void;
@@ -8,11 +9,11 @@ interface EnergyModalProps {
 function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-2"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[10px] max-w-[350px] w-full flex flex-col items-center gap-4"
+        className="bg-[#373737] rounded-[20px] p-[clamp(8px,2vw,16px)] w-full max-w-[720px] flex flex-col items-center gap-[clamp(10px,1.5vw,20px)]"
         onClick={(e) => e.stopPropagation()}
       >
         <svg width="50" height="47" viewBox="0 0 50 47" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -31,30 +32,30 @@ function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
           </defs>
         </svg>
 
-        <h2 className="font-inter font-bold text-[20px] leading-[120%] text-white text-center">
-            Больше энергии от 50 до 100 ⚡
+        <h2 className="font-inter font-bold text-[clamp(16px,2vw,20px)] leading-[120%] text-white text-center">
+            {t.energyModal.title}
         </h2>
 
-        <p className="font-inter text-[16px] leading-[113%] text-[#a6a6a6] text-center">
-          Разблокируйте блог спонсора и получите возможность зарабатывать в 2 раза больше денег!
+        <p className="font-inter text-[clamp(13px,1.4vw,16px)] leading-[113%] text-[#a6a6a6] text-center">
+          {t.energyModal.description}
         </p>
 
-        <div className="w-[117px] h-[117px] rounded-[29px] overflow-hidden border-2 border-[rgba(255,255,255,0.1)]">
+        <div className="w-[clamp(90px,10vw,117px)] h-[clamp(90px,10vw,117px)] rounded-[clamp(20px,3vw,29px)] overflow-hidden border-2 border-[rgba(255,255,255,0.1)]">
           <img
             src={channelLogo}
-            alt="Sponsor"
+            alt={t.energyModal.sponsorAlt}
             className="w-full h-full object-cover"
           />
         </div>
 
         <button
-          className="w-full py-4 rounded-[9px] border border-[rgba(255,255,255,0.3)] bg-[#00af42] font-inter font-medium text-[24px] leading-[63%] text-white text-center active:scale-[0.97] transition-transform duration-100"
+          className="w-full py-[clamp(12px,1.5vw,16px)] rounded-[9px] border border-[rgba(255,255,255,0.3)] bg-[#00af42] font-inter font-medium text-[clamp(18px,2vw,24px)] leading-[100%] text-white text-center active:scale-[0.97] transition-transform duration-100"
           onClick={() => {
             onClose();
             onUnlock?.();
           }}
         >
-          Разблокировать
+          {t.energyModal.unlockButton}
         </button>
       </div>
     </div>

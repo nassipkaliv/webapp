@@ -1,3 +1,5 @@
+import t from '../../locales/ru.json';
+
 interface EnergyBarProps {
   current: number;
   max: number;
@@ -10,9 +12,9 @@ function EnergyBar({ current, max, fillPercent, label, onPlusClick }: EnergyBarP
   const percentage = fillPercent ?? (current / max) * 100;
 
   return (
-    <div className="flex flex-col gap-2 w-full max-w-[305px] mx-auto">
+    <div className="flex flex-col gap-2 w-full max-w-[min(80%,500px)] mx-auto">
       {/* Progress bar — full width on top */}
-      <div className="w-full h-[6px] bg-black rounded-[2px] overflow-hidden">
+      <div className="w-full h-[clamp(6px,0.5vw,10px)] bg-black rounded-[2px] overflow-hidden">
         <div
           className="h-full bg-[#ffdb00] rounded-[2px] transition-[width] duration-300 ease-in-out"
           style={{ width: `${percentage}%` }}
@@ -38,14 +40,14 @@ function EnergyBar({ current, max, fillPercent, label, onPlusClick }: EnergyBarP
             />
           </svg>
 
-          <span className="font-inter font-bold text-[14px] leading-[107%] text-white">
+          <span className="font-inter font-bold text-[clamp(14px,1.5vw,16px)] leading-[107%] text-white">
             {label ?? `${current}/${max}`}
           </span>
         </div>
 
         <button
           className="w-[25px] h-[25px] rounded-[7px] bg-[#000] flex items-center justify-center shrink-0 transition-all duration-100 active:scale-90 active:brightness-90"
-          aria-label="Add energy"
+          aria-label={t.energyBar.addEnergy}
           onClick={onPlusClick}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">

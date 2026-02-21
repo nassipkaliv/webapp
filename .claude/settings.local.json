@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version:*)",
+      "Bash(npm:*)",
+      "Bash(npx create-vite@6.1.1:*)",
+      "Bash(where:*)",
+      "Bash(cmd.exe /c \"node --version\")",
+      "Bash(node node_modules/esbuild/install.js:*)",
+      "Bash(node:*)",
+      "Bash(npx vite build:*)"
+    ]
+  }
+}

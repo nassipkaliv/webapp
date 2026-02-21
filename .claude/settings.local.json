@@ -8,7 +8,8 @@
       "Bash(cmd.exe /c \"node --version\")",
       "Bash(node node_modules/esbuild/install.js:*)",
       "Bash(node:*)",
-      "Bash(npx vite build:*)"
+      "Bash(npx vite build:*)",
+      "Bash(gh api:*)"
     ]
   }
 }

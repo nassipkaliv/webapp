@@ -5,18 +5,18 @@ import EnergyBar from '../../components/EnergyBar/EnergyBar';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import EnergyModal from '../../components/EnergyModal/EnergyModal';
 
-const MAX_ENERGY = 50;
-
 interface HomePageProps {
   balance: number;
   setBalance: React.Dispatch<React.SetStateAction<number>>;
+  energy: number;
+  setEnergy: React.Dispatch<React.SetStateAction<number>>;
+  maxEnergy: number;
   onTabChange: (tab: string) => void;
   sponsorUnlocked: boolean;
   onUnlockSponsor: () => void;
 }
 
-function HomePage({ balance, setBalance, onTabChange, sponsorUnlocked, onUnlockSponsor }: HomePageProps) {
-  const [energy, setEnergy] = useState(MAX_ENERGY);
+function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChange, sponsorUnlocked, onUnlockSponsor }: HomePageProps) {
   const [showModal, setShowModal] = useState(false);
 
   const handleCoinTap = () => {
@@ -24,6 +24,7 @@ function HomePage({ balance, setBalance, onTabChange, sponsorUnlocked, onUnlockS
       setShowModal(true);
       return;
     }
+    if (navigator.vibrate) navigator.vibrate(15);
     setBalance((prev) => prev + 1);
     setEnergy((prev) => prev - 1);
   };
@@ -33,7 +34,7 @@ function HomePage({ balance, setBalance, onTabChange, sponsorUnlocked, onUnlockS
       <main className="flex-1 flex flex-col items-center justify-center px-4 pb-[calc(105px+env(safe-area-inset-bottom,0px))] relative z-[1] gap-10">
         <BalanceHeader amount={balance.toFixed(2)} currency="EUR" />
         <CoinHero onTap={handleCoinTap} />
-        <EnergyBar current={energy} max={MAX_ENERGY} fillPercent={(energy / MAX_ENERGY) * 50} onPlusClick={() => setShowModal(true)} />
+        <EnergyBar current={energy} max={maxEnergy} fillPercent={(energy / maxEnergy) * 50} onPlusClick={() => setShowModal(true)} />
       </main>
 
       <BottomNav activeTab="home" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} />

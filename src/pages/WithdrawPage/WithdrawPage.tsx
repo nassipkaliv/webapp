@@ -6,9 +6,10 @@ import WithdrawModal from '../../components/WithdrawModal/WithdrawModal';
 interface WithdrawPageProps {
   balance: number;
   onTabChange: (tab: string) => void;
+  sponsorUnlocked?: boolean;
 }
 
-function WithdrawPage({ balance, onTabChange }: WithdrawPageProps) {
+function WithdrawPage({ balance, onTabChange, sponsorUnlocked }: WithdrawPageProps) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -41,9 +42,14 @@ function WithdrawPage({ balance, onTabChange }: WithdrawPageProps) {
         </button>
       </main>
 
-      <BottomNav activeTab="withdraw" onTabChange={onTabChange} />
+      <BottomNav activeTab="withdraw" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} />
 
-      {showModal && <WithdrawModal onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <WithdrawModal
+          onClose={() => setShowModal(false)}
+          onGoToSponsor={sponsorUnlocked ? () => onTabChange('sponsor') : undefined}
+        />
+      )}
     </div>
   );
 }

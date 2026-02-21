@@ -1,8 +1,9 @@
 interface EnergyModalProps {
   onClose: () => void;
+  onUnlock?: () => void;
 }
 
-function EnergyModal({ onClose }: EnergyModalProps) {
+function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-2"
@@ -28,7 +29,7 @@ function EnergyModal({ onClose }: EnergyModalProps) {
           </defs>
         </svg>
 
-        <h2 className="font-inter font-bold  whitespace-nowrap text-[20px] leading-[75%] text-white text-center">
+        <h2 className="font-inter font-bold text-[20px] leading-[120%] text-white text-center">
             Больше энергии от 50 до 100 ⚡
         </h2>
 
@@ -46,7 +47,10 @@ function EnergyModal({ onClose }: EnergyModalProps) {
 
         <button
           className="w-full py-4 rounded-[9px] border border-[rgba(255,255,255,0.3)] bg-[#00af42] font-inter font-medium text-[24px] leading-[63%] text-white text-center active:scale-[0.97] transition-transform duration-100"
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            onUnlock?.();
+          }}
         >
           Разблокировать
         </button>

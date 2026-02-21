@@ -1,15 +1,20 @@
+import { useState } from 'react';
+
 interface WithdrawModalProps {
   onClose: () => void;
+  onGoToSponsor?: () => void;
 }
 
 function WithdrawModal({ onClose }: WithdrawModalProps) {
+  const [showError, setShowError] = useState(false);
+
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-2"
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[10px] max-w-[350px] w-full flex flex-col items-center gap-4"
+        className="bg-[#373737] rounded-[20px] p-[10px] py-[25px] max-w-[350px] w-full flex flex-col items-center gap-4"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-inter font-bold text-[24px] text-white text-center leading-[63%]">
@@ -22,9 +27,17 @@ function WithdrawModal({ onClose }: WithdrawModalProps) {
           className="w-full py-3 px-4 mt-[30px] rounded-[9px] border border-[rgba(255,255,255,0.3)] bg-[#535353] font-inter text-[16px] text-white placeholder-[rgba(255,255,255,0.4)] outline-none"
         />
 
+        {showError && (
+          <div className="w-full flex flex-col gap-2">
+            <p className="font-inter font-semibold text-[14px] text-[#ff4d4d] text-center leading-[120%]">
+              Минимальный вывод от 1000 евро. Перейдите в раздел спонсор, чтобы заработать ещё больше!
+            </p>
+          </div>
+        )}
+
         <button
           className="w-full py-4 rounded-[9px] mt-[40px] bg-[#00af42] font-inter font-bold text-[24px] leading-[63%] text-center text-white active:scale-[0.97] transition-transform duration-100"
-          onClick={onClose}
+          onClick={() => setShowError(true)}
         >
           Вывести
         </button>

@@ -11,9 +11,11 @@ interface HomePageProps {
   balance: number;
   setBalance: React.Dispatch<React.SetStateAction<number>>;
   onTabChange: (tab: string) => void;
+  sponsorUnlocked: boolean;
+  onUnlockSponsor: () => void;
 }
 
-function HomePage({ balance, setBalance, onTabChange }: HomePageProps) {
+function HomePage({ balance, setBalance, onTabChange, sponsorUnlocked, onUnlockSponsor }: HomePageProps) {
   const [energy, setEnergy] = useState(MAX_ENERGY);
   const [showModal, setShowModal] = useState(false);
 
@@ -34,9 +36,14 @@ function HomePage({ balance, setBalance, onTabChange }: HomePageProps) {
         <EnergyBar current={energy} max={MAX_ENERGY} fillPercent={(energy / MAX_ENERGY) * 50} onPlusClick={() => setShowModal(true)} />
       </main>
 
-      <BottomNav activeTab="home" onTabChange={onTabChange} />
+      <BottomNav activeTab="home" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} />
 
-      {showModal && <EnergyModal onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <EnergyModal
+          onClose={() => setShowModal(false)}
+          onUnlock={onUnlockSponsor}
+        />
+      )}
     </div>
   );
 }

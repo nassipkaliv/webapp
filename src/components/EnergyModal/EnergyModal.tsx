@@ -1,3 +1,5 @@
+import channelLogo from '../../assets/channelLogo.png';
+
 interface EnergyModalProps {
   onClose: () => void;
   onUnlock?: () => void;
@@ -39,7 +41,7 @@ function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
 
         <div className="w-[117px] h-[117px] rounded-[29px] overflow-hidden border-2 border-[rgba(255,255,255,0.1)]">
           <img
-            src="/src/assets/channelLogo.png"
+            src={channelLogo}
             alt="Sponsor"
             className="w-full h-full object-cover"
           />

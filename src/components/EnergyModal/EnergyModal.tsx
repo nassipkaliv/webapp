@@ -13,9 +13,14 @@ function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[clamp(8px,2vw,16px)] w-full max-w-[720px] flex flex-col items-center gap-[clamp(10px,1.5vw,20px)]"
+        className="bg-[#373737] rounded-[20px] p-[clamp(8px,2vw,16px)] w-full max-w-[720px] flex flex-col items-center gap-[clamp(10px,1.5vw,20px)] relative"
         onClick={(e) => e.stopPropagation()}
       >
+        <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-all" onClick={onClose}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L15 15M15 1L1 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
         <svg width="50" height="47" viewBox="0 0 50 47" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M20.372 2.75591C22.3719 -0.942023 27.6887 -0.91234 29.6478 2.80785L48.8585 39.2949C50.7013 42.795 48.1634 47 44.2082 47H5.26368C1.28129 47 -1.25408 42.7455 0.640643 39.243L20.372 2.75591Z" fill="#212121" />
           <path d="M20.372 2.75591C22.3719 -0.942023 27.6887 -0.91234 29.6478 2.80785L48.8585 39.2949C50.7013 42.795 48.1634 47 44.2082 47H5.26368C1.28129 47 -1.25408 42.7455 0.640643 39.243L20.372 2.75591Z" fill="url(#paint0_linear_22_646)" />

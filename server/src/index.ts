@@ -31,16 +31,16 @@ async function main() {
     res.json({ status: 'ok' });
   });
 
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-
-  // Start Telegram bot
+  // Start Telegram bot (webhook mode — needs app for route)
   if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN !== 'your_bot_token_here') {
-    startBot();
+    startBot(app);
   } else {
     console.warn('TELEGRAM_BOT_TOKEN not set, bot will not start');
   }
+
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 }
 
 main().catch(console.error);

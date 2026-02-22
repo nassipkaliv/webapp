@@ -17,10 +17,7 @@ async function main() {
   const PORT = process.env.PORT || 3001;
 
   // Middleware
-  app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  }));
+  app.use(cors());
   app.use(express.json());
 
   // Serve uploaded images

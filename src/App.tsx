@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import HomePage from './pages/HomePage/HomePage';
 import WithdrawPage from './pages/WithdrawPage/WithdrawPage';
 import SponsorPage from './pages/SponsorPage/SponsorPage';
@@ -6,32 +6,72 @@ import { usePosts } from './hooks/usePosts';
 import { useReadPosts } from './hooks/useReadPosts';
 
 const MAX_ENERGY = 50;
+const ENERGY_REGEN_MS = 2 * 60 * 1000; // 1 energy per 2 minutes
+
+function loadNumber(key: string, fallback: number): number {
+  try {
+    const v = localStorage.getItem(key);
+    if (v === null) return fallback;
+    const n = Number(v);
+    return isNaN(n) ? fallback : n;
+  } catch { return fallback; }
+}
+
+function loadBool(key: string, fallback: boolean): boolean {
+  try {
+    const v = localStorage.getItem(key);
+    if (v === null) return fallback;
+    return v === 'true';
+  } catch { return fallback; }
+}
+
+/** Calculate how much energy regenerated while the app was closed */
+function calcOfflineRegen(savedEnergy: number, savedTimestamp: number): number {
+  if (!savedTimestamp) return savedEnergy;
+  const elapsed = Date.now() - savedTimestamp;
+  const regenTicks = Math.floor(elapsed / ENERGY_REGEN_MS);
+  return Math.min(savedEnergy + regenTicks, MAX_ENERGY);
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [balance, setBalance] = useState(100);
-  const [energy, setEnergy] = useState(MAX_ENERGY);
-  const [sponsorUnlocked, setSponsorUnlocked] = useState(false);
+  const [balance, setBalance] = useState(() => loadNumber('balance', 100));
+  const [energy, setEnergy] = useState(() =>
+    calcOfflineRegen(loadNumber('energy', MAX_ENERGY), loadNumber('energyTimestamp', 0))
+  );
+  const [sponsorUnlocked, setSponsorUnlocked] = useState(() => loadBool('sponsorUnlocked', false));
   const { posts, loading: postsLoading, error: postsError, refetch: refetchPosts } = usePosts();
   const { markAsRead, unreadCount } = useReadPosts();
   const unread = unreadCount(posts.map(p => p.id));
+
+  // Persist balance
+  useEffect(() => { localStorage.setItem('balance', String(balance)); }, [balance]);
+
+  // Persist energy + timestamp
+  useEffect(() => {
+    localStorage.setItem('energy', String(energy));
+    localStorage.setItem('energyTimestamp', String(Date.now()));
+  }, [energy]);
+
+  // Persist sponsorUnlocked
+  useEffect(() => { localStorage.setItem('sponsorUnlocked', String(sponsorUnlocked)); }, [sponsorUnlocked]);
 
   // Energy regeneration: 1 energy per 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setEnergy((prev) => Math.min(prev + 1, MAX_ENERGY));
-    }, 2 * 60 * 1000);
+    }, ENERGY_REGEN_MS);
     return () => clearInterval(interval);
   }, []);
 
-  const handleUnlockSponsor = () => {
+  const handleUnlockSponsor = useCallback(() => {
     setSponsorUnlocked(true);
     setActiveTab('sponsor');
-  };
+  }, []);
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab);
-  };
+  }, []);
 
   return (
     <div className="mx-auto min-h-dvh relative overflow-hidden">

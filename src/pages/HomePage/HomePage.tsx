@@ -26,10 +26,9 @@ function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChan
       setShowModal(true);
       return;
     }
-    try {
-      window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium');
-    } catch {}
-    if (navigator.vibrate) navigator.vibrate(15);
+    // Vibration feedback — try Telegram first, then browser API
+    try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium'); } catch {}
+    try { navigator.vibrate?.(15); } catch {}
     setBalance((prev) => prev + 1);
     setEnergy((prev) => prev - 1);
   };

@@ -38,7 +38,7 @@ function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChan
       <main className="flex-1 flex flex-col items-center justify-center px-[clamp(12px,4vw,40px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1] gap-[clamp(24px,3vw,48px)]">
         <BalanceHeader amount={balance.toFixed(2)} currency={t.currency} />
         <CoinHero onTap={handleCoinTap} />
-        <EnergyBar current={energy} max={maxEnergy} fillPercent={(energy / maxEnergy) * 50} onPlusClick={() => setShowModal(true)} />
+        <EnergyBar current={energy} max={maxEnergy} onPlusClick={() => setShowModal(true)} />
       </main>
 
       <BottomNav activeTab="home" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} sponsorBadge={sponsorBadge} />

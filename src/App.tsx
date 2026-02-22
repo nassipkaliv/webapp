@@ -5,7 +5,8 @@ import SponsorPage from './pages/SponsorPage/SponsorPage';
 import { usePosts } from './hooks/usePosts';
 import { useReadPosts } from './hooks/useReadPosts';
 
-const MAX_ENERGY = 50;
+const BASE_ENERGY = 50;
+const UNLOCKED_ENERGY = 100;
 const ENERGY_REGEN_MS = 2 * 60 * 1000; // 1 energy per 2 minutes
 
 function loadNumber(key: string, fallback: number): number {
@@ -26,20 +27,21 @@ function loadBool(key: string, fallback: boolean): boolean {
 }
 
 /** Calculate how much energy regenerated while the app was closed */
-function calcOfflineRegen(savedEnergy: number, savedTimestamp: number): number {
+function calcOfflineRegen(savedEnergy: number, savedTimestamp: number, max: number): number {
   if (!savedTimestamp) return savedEnergy;
   const elapsed = Date.now() - savedTimestamp;
   const regenTicks = Math.floor(elapsed / ENERGY_REGEN_MS);
-  return Math.min(savedEnergy + regenTicks, MAX_ENERGY);
+  return Math.min(savedEnergy + regenTicks, max);
 }
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [balance, setBalance] = useState(() => loadNumber('balance', 100));
-  const [energy, setEnergy] = useState(() =>
-    calcOfflineRegen(loadNumber('energy', MAX_ENERGY), loadNumber('energyTimestamp', 0))
-  );
   const [sponsorUnlocked, setSponsorUnlocked] = useState(() => loadBool('sponsorUnlocked', false));
+  const maxEnergy = sponsorUnlocked ? UNLOCKED_ENERGY : BASE_ENERGY;
+  const [energy, setEnergy] = useState(() =>
+    calcOfflineRegen(loadNumber('energy', maxEnergy), loadNumber('energyTimestamp', 0), maxEnergy)
+  );
   const { posts, loading: postsLoading, error: postsError, refetch: refetchPosts } = usePosts();
   const { markAsRead, unreadCount } = useReadPosts();
   const unread = unreadCount(posts.map(p => p.id));
@@ -59,10 +61,10 @@ function App() {
   // Energy regeneration: 1 energy per 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      setEnergy((prev) => Math.min(prev + 1, MAX_ENERGY));
+      setEnergy((prev) => Math.min(prev + 1, maxEnergy));
     }, ENERGY_REGEN_MS);
     return () => clearInterval(interval);
-  }, []);
+  }, [maxEnergy]);
 
   const handleUnlockSponsor = useCallback(() => {
     setSponsorUnlocked(true);
@@ -81,7 +83,7 @@ function App() {
           setBalance={setBalance}
           energy={energy}
           setEnergy={setEnergy}
-          maxEnergy={MAX_ENERGY}
+          maxEnergy={maxEnergy}
           onTabChange={handleTabChange}
           sponsorUnlocked={sponsorUnlocked}
           onUnlockSponsor={handleUnlockSponsor}

@@ -35,7 +35,7 @@ function SponsorPage({ onTabChange, posts, postsLoading, postsError, refetchPost
               <path d="M12.3838 23.6912L1.38379 12.1912L12.3838 0.691162" stroke="white" strokeWidth="2" />
             </svg>
           </button>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
             <span className="font-inter font-bold text-[clamp(14px,2vw,18px)] text-white leading-[83%]">
               {t.sponsor.channelName}
             </span>

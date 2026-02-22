@@ -73,7 +73,7 @@ function BottomNav({ activeTab, onTabChange, sponsorUnlocked, sponsorBadge }: Bo
         return (
           <button
             key={id}
-            className="flex flex-col items-center justify-center gap-1 transition-opacity duration-150 active:scale-95 relative"
+            className="flex flex-col items-center justify-center gap-1 transition-opacity duration-150 active:scale-95 relative px-4 py-2 -my-2"
             style={{ color: isActive ? '#ffdb00' : 'rgba(255,255,255,0.7)' }}
             onClick={() => onTabChange(id)}
           >

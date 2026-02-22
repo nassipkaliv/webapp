@@ -13,8 +13,9 @@ export function usePosts() {
     try {
       const data = await fetchPosts();
       setPosts(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load posts');
+    } catch {
+      // If API is unavailable (e.g. GH Pages without backend), show empty list
+      setPosts([]);
     } finally {
       setLoading(false);
     }

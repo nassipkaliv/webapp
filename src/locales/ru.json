@@ -24,20 +24,15 @@
   },
 
   "post": {
-    "title": "Welcome to Our Platform",
-    "description": "We create modern digital solutions that help users navigate easily, make informed decisions, and enjoy a convenient online experience.",
-    "whyTitle": "Why Choose Us",
-    "whyItems": [
-      "Clear and user-friendly interface",
-      "Access from any device",
-      "Fast registration and quick start",
-      "User support available 24/7"
-    ],
     "detailsButton": "ПОДРОБНЕЕ",
     "telegram": "Telegram",
     "whatsapp": "WhatsApp",
     "instagram": "Instagram",
-    "postImageAlt": "Post"
+    "postImageAlt": "Post",
+    "loading": "Загрузка...",
+    "error": "Ошибка загрузки",
+    "retry": "Повторить",
+    "noPosts": "Нет публикаций"
   },
 
   "energyModal": {

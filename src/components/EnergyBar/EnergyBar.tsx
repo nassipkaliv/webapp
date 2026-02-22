@@ -45,15 +45,17 @@ function EnergyBar({ current, max, fillPercent, label, onPlusClick }: EnergyBarP
           </span>
         </div>
 
-        <button
-          className="w-[25px] h-[25px] rounded-[7px] bg-[#000] flex items-center justify-center shrink-0 transition-all duration-100 active:scale-90 active:brightness-90"
-          aria-label={t.energyBar.addEnergy}
-          onClick={onPlusClick}
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 1V6M6 11V6M6 6H11H1" stroke="#FFDB02" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
+        {onPlusClick && (
+          <button
+            className="w-[25px] h-[25px] rounded-[7px] bg-[#000] flex items-center justify-center shrink-0 transition-all duration-100 active:scale-90 active:brightness-90"
+            aria-label={t.energyBar.addEnergy}
+            onClick={onPlusClick}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 1V6M6 11V6M6 6H11H1" stroke="#FFDB02" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );

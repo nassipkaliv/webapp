@@ -28,29 +28,29 @@ function SponsorPage({ onTabChange, posts, postsLoading, postsError, refetchPost
       <div className="sticky top-0 z-[10] bg-[#190503] px-[clamp(12px,4vw,48px)] pt-4 pb-3">
         <div className="relative flex items-center justify-between">
           <button
-            className="text-white text-[24px] leading-none active:scale-90 transition-transform duration-100 shrink-0 z-[1]"
+            className="text-white text-[24px] leading-none active:scale-90 transition-transform duration-100 shrink-0 z-[1] px-3 py-3 -ml-3"
             onClick={() => onTabChange('home')}
           >
             <svg width="14" height="25" viewBox="0 0 14 25" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12.3838 23.6912L1.38379 12.1912L12.3838 0.691162" stroke="white" strokeWidth="2" />
             </svg>
           </button>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
-            <span className="font-inter font-bold text-[clamp(14px,2vw,18px)] text-white leading-[83%]">
-              {t.sponsor.channelName}
-            </span>
-            <span className="font-inter text-[clamp(10px,1.2vw,12px)] text-[#a6a6a6] leading-[125%] font-bold">
-              {t.sponsor.subscribers}
-            </span>
-          </div>
           <button
-            className="shrink-0 z-[1] active:scale-95 transition-transform duration-100"
+            className="absolute inset-0 left-12 flex items-center active:scale-[0.97] transition-transform duration-100"
             onClick={() => setShowChannel(true)}
           >
+            <div className="flex-1 flex flex-col items-center gap-2">
+              <span className="font-inter font-bold text-[clamp(14px,2vw,18px)] text-white leading-[83%]">
+                {t.sponsor.channelName}
+              </span>
+              <span className="font-inter text-[clamp(10px,1.2vw,12px)] text-[#a6a6a6] leading-[125%] font-bold">
+                {t.sponsor.subscribers}
+              </span>
+            </div>
             <img
               src={channelLogo}
               alt={t.sponsor.channelAvatarAlt}
-              className="w-[clamp(32px,4vw,42px)] h-[clamp(32px,4vw,42px)] rounded-full object-cover"
+              className="w-[clamp(32px,4vw,42px)] h-[clamp(32px,4vw,42px)] rounded-full object-cover shrink-0"
             />
           </button>
         </div>

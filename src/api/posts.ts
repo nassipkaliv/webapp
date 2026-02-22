@@ -1,6 +1,6 @@
 import type { Post, ApiResponse } from '../types/post';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://webapp-omhl.onrender.com';
 
 export async function fetchPosts(): Promise<Post[]> {
   const res = await fetch(`${API_BASE}/api/posts`);

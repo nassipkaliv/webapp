@@ -1,6 +1,7 @@
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
 
 const DB_PATH = path.join('/tmp', 'posts.db');
 
@@ -9,7 +10,11 @@ let db: SqlJsDatabase | null = null;
 export async function getDb(): Promise<SqlJsDatabase> {
   if (db) return db;
 
-  const SQL = await initSqlJs();
+  // Locate sql.js WASM file — needed for Vercel serverless
+  const require = createRequire(import.meta.url);
+  const wasmPath = path.join(path.dirname(require.resolve('sql.js')), 'sql-wasm.wasm');
+  const wasmBinary = fs.readFileSync(wasmPath);
+  const SQL = await initSqlJs({ wasmBinary });
 
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);

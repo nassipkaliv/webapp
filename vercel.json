@@ -2,6 +2,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "functions": {
+    "api/**/*.ts": {
+      "includeFiles": "node_modules/sql.js/dist/sql-wasm.wasm"
+    }
+  },
   "rewrites": [
     { "source": "/api/posts/:path*", "destination": "/api/posts" },
     { "source": "/api/bot/:path*", "destination": "/api/bot" },

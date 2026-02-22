@@ -8,9 +8,10 @@ interface WithdrawPageProps {
   balance: number;
   onTabChange: (tab: string) => void;
   sponsorUnlocked?: boolean;
+  sponsorBadge?: number;
 }
 
-function WithdrawPage({ balance, onTabChange, sponsorUnlocked }: WithdrawPageProps) {
+function WithdrawPage({ balance, onTabChange, sponsorUnlocked, sponsorBadge }: WithdrawPageProps) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -43,7 +44,7 @@ function WithdrawPage({ balance, onTabChange, sponsorUnlocked }: WithdrawPagePro
         </button>
       </main>
 
-      <BottomNav activeTab="withdraw" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} />
+      <BottomNav activeTab="withdraw" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} sponsorBadge={sponsorBadge} />
 
       {showModal && (
         <WithdrawModal

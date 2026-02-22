@@ -15,9 +15,10 @@ interface HomePageProps {
   onTabChange: (tab: string) => void;
   sponsorUnlocked: boolean;
   onUnlockSponsor: () => void;
+  sponsorBadge?: number;
 }
 
-function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChange, sponsorUnlocked, onUnlockSponsor }: HomePageProps) {
+function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChange, sponsorUnlocked, onUnlockSponsor, sponsorBadge }: HomePageProps) {
   const [showModal, setShowModal] = useState(false);
 
   const handleCoinTap = () => {
@@ -41,7 +42,7 @@ function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChan
         <EnergyBar current={energy} max={maxEnergy} fillPercent={(energy / maxEnergy) * 50} onPlusClick={() => setShowModal(true)} />
       </main>
 
-      <BottomNav activeTab="home" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} />
+      <BottomNav activeTab="home" onTabChange={onTabChange} sponsorUnlocked={sponsorUnlocked} sponsorBadge={sponsorBadge} />
 
       {showModal && (
         <EnergyModal

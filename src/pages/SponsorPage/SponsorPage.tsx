@@ -5,17 +5,23 @@ import ChannelModal from '../../components/ChannelModal/ChannelModal';
 import PostCard from '../../components/PostCard/PostCard';
 import channelLogo from '../../assets/channelLogo.png';
 import t from '../../locales/ru.json';
-import { usePosts } from '../../hooks/usePosts';
+import { usePostVisibilityTracker } from '../../hooks/useReadPosts';
 import type { Post } from '../../types/post';
 
 interface SponsorPageProps {
   onTabChange: (tab: string) => void;
+  posts: Post[];
+  postsLoading: boolean;
+  postsError: string | null;
+  refetchPosts: () => void;
+  markAsRead: (id: number) => void;
+  unreadCount: number;
 }
 
-function SponsorPage({ onTabChange }: SponsorPageProps) {
-  const { posts, loading, error, refetch } = usePosts();
+function SponsorPage({ onTabChange, posts, postsLoading, postsError, refetchPosts, markAsRead, unreadCount }: SponsorPageProps) {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showChannel, setShowChannel] = useState(false);
+  const observeRef = usePostVisibilityTracker(markAsRead);
 
   return (
     <div className="h-dvh relative overflow-y-auto" style={{ background: 'linear-gradient(180deg, #000000 0%, #440D08 38%, #B42115 100%)' }}>
@@ -52,25 +58,25 @@ function SponsorPage({ onTabChange }: SponsorPageProps) {
 
       <main className="flex flex-col px-[clamp(12px,4vw,48px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1]">
         <div className="flex flex-col gap-4 max-w-[600px] mx-auto w-full pt-4 pb-4">
-          {loading && (
+          {postsLoading && (
             <div className="flex justify-center py-12">
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             </div>
           )}
 
-          {error && (
+          {postsError && (
             <div className="text-center py-12">
               <p className="font-inter text-[14px] text-[#a6a6a6] mb-3">{t.post.error}</p>
               <button
                 className="font-inter font-bold text-[14px] text-white bg-[#575757] rounded-[7px] px-6 py-2 active:scale-95 transition-transform duration-100"
-                onClick={refetch}
+                onClick={refetchPosts}
               >
                 {t.post.retry}
               </button>
             </div>
           )}
 
-          {!loading && !error && posts.length === 0 && (
+          {!postsLoading && !postsError && posts.length === 0 && (
             <p className="font-inter text-[14px] text-[#a6a6a6] text-center py-12">
               {t.post.noPosts}
             </p>
@@ -79,6 +85,7 @@ function SponsorPage({ onTabChange }: SponsorPageProps) {
           {posts.map((post) => (
             <PostCard
               key={post.id}
+              ref={observeRef}
               post={post}
               onDetailsClick={(p) => setSelectedPost(p)}
             />
@@ -89,7 +96,7 @@ function SponsorPage({ onTabChange }: SponsorPageProps) {
         {showChannel && <ChannelModal onClose={() => setShowChannel(false)} />}
       </main>
 
-      <BottomNav activeTab="sponsor" onTabChange={onTabChange} sponsorUnlocked />
+      <BottomNav activeTab="sponsor" onTabChange={onTabChange} sponsorUnlocked sponsorBadge={unreadCount} />
     </div>
   );
 }

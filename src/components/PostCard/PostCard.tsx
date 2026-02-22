@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import type { Post } from '../../types/post';
 import { likePost, unlikePost, getImageUrl } from '../../api/posts';
 import postImgFallback from '../../assets/postImg.png';
@@ -9,7 +9,7 @@ interface PostCardProps {
   onDetailsClick: (post: Post) => void;
 }
 
-function PostCard({ post, onDetailsClick }: PostCardProps) {
+const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ post, onDetailsClick }, ref) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likeCount);
 
@@ -33,7 +33,7 @@ function PostCard({ post, onDetailsClick }: PostCardProps) {
   };
 
   return (
-    <div className="bg-[#232227] rounded-[clamp(12px,1.5vw,20px)] py-[clamp(12px,1.5vw,24px)] px-[clamp(10px,1.3vw,20px)] flex flex-col gap-[clamp(12px,1.5vw,24px)]">
+    <div ref={ref} data-post-id={post.id} className="bg-[#232227] rounded-[clamp(12px,1.5vw,20px)] py-[clamp(12px,1.5vw,24px)] px-[clamp(10px,1.3vw,20px)] flex flex-col gap-[clamp(12px,1.5vw,24px)]">
       <div className="w-full rounded-[12px] overflow-hidden">
         <img
           src={imgSrc}
@@ -116,6 +116,6 @@ function PostCard({ post, onDetailsClick }: PostCardProps) {
       </div>
     </div>
   );
-}
+});
 
 export default PostCard;

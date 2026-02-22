@@ -4,6 +4,7 @@ interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   sponsorUnlocked?: boolean;
+  sponsorBadge?: number;
 }
 
 const HomeIcon = () => (
@@ -58,9 +59,9 @@ const SponsorIcon = () => (
   </svg>
 );
 
-function BottomNav({ activeTab, onTabChange, sponsorUnlocked }: BottomNavProps) {
+function BottomNav({ activeTab, onTabChange, sponsorUnlocked, sponsorBadge }: BottomNavProps) {
   const tabs = [
-    ...(sponsorUnlocked ? [{ id: 'sponsor', label: t.nav.sponsor, Icon: SponsorIcon, badge: 85 }] : []),
+    ...(sponsorUnlocked ? [{ id: 'sponsor', label: t.nav.sponsor, Icon: SponsorIcon, badge: sponsorBadge && sponsorBadge > 0 ? sponsorBadge : undefined }] : []),
     { id: 'home', label: t.nav.home, Icon: HomeIcon, badge: undefined },
     { id: 'withdraw', label: t.nav.withdraw, Icon: WithdrawIcon, badge: undefined },
   ];

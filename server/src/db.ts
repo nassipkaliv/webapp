@@ -11,11 +11,9 @@ let db: SqlJsDatabase;
 export async function initDb() {
   const SQL = await initSqlJs();
 
-  // Ensure data directory exists
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-  // Load existing DB or create new one
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);
     db = new SQL.Database(buffer);
@@ -55,7 +53,6 @@ export function getDb() {
   return db;
 }
 
-// --- CRUD helpers ---
 
 export interface PostRow {
   id: number;
@@ -84,7 +81,7 @@ function rowsToObjects(result: initSqlJs.QueryExecResult[]): PostRow[] {
 }
 
 export function getAllPosts(): PostRow[] {
-  const result = db.exec('SELECT * FROM posts ORDER BY created_at DESC');
+  const result = db.exec('SELECT * FROM posts ORDER BY created_at ASC');
   return rowsToObjects(result);
 }
 
@@ -131,7 +128,7 @@ export function createPost(post: {
 
   // sql.js: get all posts and return the last one (most reliable)
   const allPosts = getAllPosts();
-  return allPosts[0]; // sorted DESC by created_at, so first is newest
+  return allPosts[allPosts.length - 1]; // sorted ASC by created_at, so last is newest
 }
 
 export function updatePost(id: number, fields: Partial<{

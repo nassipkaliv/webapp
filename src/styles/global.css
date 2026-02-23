@@ -39,3 +39,9 @@ button {
   color: inherit;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Hyperlinks inside post content */
+.post-content a {
+  color: #5eafff;
+  text-decoration: underline;
+}

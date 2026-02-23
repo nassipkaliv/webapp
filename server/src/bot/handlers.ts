@@ -62,10 +62,10 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
         result += `<pre>${escaped}</pre>`;
         break;
       case 'text_link':
-        result += `<a href="${entity.url}">${escaped}</a>`;
+        result += `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">${escaped}</a>`;
         break;
       case 'url':
-        result += `<a href="${content}">${escaped}</a>`;
+        result += `<a href="${content}" target="_blank" rel="noopener noreferrer">${escaped}</a>`;
         break;
       default:
         result += escaped;

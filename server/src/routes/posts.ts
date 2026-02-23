@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
-  getAllPosts, getPostById, createPost, updatePost, deletePost,
+  getAllPosts, getPostsPaginated, getPostById, createPost, updatePost, deletePost,
   incrementLike, decrementLike, type PostRow,
 } from '../db.js';
 
@@ -47,10 +47,20 @@ function transformPost(row: PostRow) {
   };
 }
 
-// GET /api/posts
-router.get('/', (_req: Request, res: Response) => {
-  const posts = getAllPosts();
-  res.json({ success: true, data: posts.map(transformPost) });
+// GET /api/posts?limit=10&offset=0
+router.get('/', (req: Request, res: Response) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 0, 0), 50);
+  const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
+
+  // If no pagination params, return all (backwards compatible)
+  if (!req.query.limit) {
+    const posts = getAllPosts();
+    res.json({ success: true, data: posts.map(transformPost) });
+    return;
+  }
+
+  const { posts, total } = getPostsPaginated(limit, offset);
+  res.json({ success: true, data: posts.map(transformPost), total, limit, offset });
 });
 
 // GET /api/posts/:id

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import DetailsModal from '../../components/DetailsModal/DetailsModal';
 import ChannelModal from '../../components/ChannelModal/ChannelModal';
@@ -12,19 +12,64 @@ interface SponsorPageProps {
   onTabChange: (tab: string) => void;
   posts: Post[];
   postsLoading: boolean;
+  loadingMore: boolean;
   postsError: string | null;
+  hasMore: boolean;
+  loadMore: () => void;
   refetchPosts: () => void;
   markAsRead: (id: number) => void;
+  readIds: Set<number>;
   unreadCount: number;
 }
 
-function SponsorPage({ onTabChange, posts, postsLoading, postsError, refetchPosts, markAsRead, unreadCount }: SponsorPageProps) {
+function SponsorPage({ onTabChange, posts, postsLoading, loadingMore, postsError, hasMore, loadMore, refetchPosts, markAsRead, readIds, unreadCount }: SponsorPageProps) {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showChannel, setShowChannel] = useState(false);
   const observeRef = usePostVisibilityTracker(markAsRead);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasScrolled = useRef(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to first unread post on mount
+  useEffect(() => {
+    if (hasScrolled.current || postsLoading || posts.length === 0) return;
+    hasScrolled.current = true;
+
+    const firstUnreadPost = posts.find(p => !readIds.has(p.id));
+    if (!firstUnreadPost) return;
+
+    requestAnimationFrame(() => {
+      const el = scrollContainerRef.current?.querySelector(
+        `[data-post-id="${firstUnreadPost.id}"]`
+      );
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [posts, postsLoading, readIds]);
+
+  // Infinite scroll — observe sentinel element
+  const loadMoreRef = useRef(loadMore);
+  loadMoreRef.current = loadMore;
+  const hasMoreRef = useRef(hasMore);
+  hasMoreRef.current = hasMore;
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasMoreRef.current) {
+          loadMoreRef.current();
+        }
+      },
+      { root: scrollContainerRef.current, rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="h-dvh relative overflow-y-auto" style={{ background: 'linear-gradient(180deg, #000000 0%, #440D08 38%, #B42115 100%)' }}>
+    <div ref={scrollContainerRef} className="h-dvh relative overflow-y-auto" style={{ background: 'linear-gradient(180deg, #000000 0%, #440D08 38%, #B42115 100%)' }}>
       <div className="sticky top-0 z-[10] bg-[#190503] px-[clamp(12px,4vw,48px)] pt-4 pb-3">
         <div className="relative flex items-center justify-between">
           <button
@@ -90,6 +135,15 @@ function SponsorPage({ onTabChange, posts, postsLoading, postsError, refetchPost
               onDetailsClick={(p) => setSelectedPost(p)}
             />
           ))}
+
+          {/* Sentinel for infinite scroll */}
+          <div ref={sentinelRef} className="h-1" />
+
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
         </div>
 
         {selectedPost && <DetailsModal post={selectedPost} onClose={() => setSelectedPost(null)} />}

@@ -10,6 +10,14 @@ export async function fetchPosts(): Promise<Post[]> {
   return json.data!;
 }
 
+export async function fetchPostsPaginated(limit: number, offset: number): Promise<{ posts: Post[]; total: number }> {
+  const res = await fetch(`${API_BASE}/api/posts?limit=${limit}&offset=${offset}`);
+  if (!res.ok) throw new Error(`Failed to fetch posts: ${res.status}`);
+  const json: ApiResponse<Post[]> = await res.json();
+  if (!json.success) throw new Error(json.error || 'Unknown error');
+  return { posts: json.data!, total: json.total ?? 0 };
+}
+
 export async function likePost(id: number): Promise<Post> {
   const res = await fetch(`${API_BASE}/api/posts/${id}/like`, { method: 'POST' });
   if (!res.ok) throw new Error(`Failed to like post: ${res.status}`);

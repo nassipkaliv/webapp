@@ -85,6 +85,13 @@ export function getAllPosts(): PostRow[] {
   return rowsToObjects(result);
 }
 
+export function getPostsPaginated(limit: number, offset: number): { posts: PostRow[]; total: number } {
+  const countResult = db.exec('SELECT COUNT(*) as cnt FROM posts');
+  const total = countResult.length ? (countResult[0]!.values[0]![0] as number) : 0;
+  const result = db.exec(`SELECT * FROM posts ORDER BY created_at ASC LIMIT ${limit} OFFSET ${offset}`);
+  return { posts: rowsToObjects(result), total };
+}
+
 export function getPostById(id: number): PostRow | undefined {
   const stmt = db.prepare('SELECT * FROM posts WHERE id = ?');
   stmt.bind([id]);

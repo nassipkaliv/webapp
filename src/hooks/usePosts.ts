@@ -1,27 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Post } from '../types/post';
-import { fetchPosts } from '../api/posts';
+import { fetchPostsPaginated } from '../api/posts';
+
+const PAGE_SIZE = 10;
 
 export function usePosts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const offsetRef = useRef(0);
 
-  const load = async () => {
+  const loadInitial = useCallback(async () => {
     setLoading(true);
     setError(null);
+    offsetRef.current = 0;
     try {
-      const data = await fetchPosts();
+      const { posts: data, total } = await fetchPostsPaginated(PAGE_SIZE, 0);
       setPosts(data);
+      offsetRef.current = data.length;
+      setHasMore(data.length < total);
     } catch {
-      // If API is unavailable (e.g. GH Pages without backend), show empty list
       setPosts([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const { posts: data, total } = await fetchPostsPaginated(PAGE_SIZE, offsetRef.current);
+      setPosts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const newPosts = data.filter(p => !existingIds.has(p.id));
+        return [...prev, ...newPosts];
+      });
+      offsetRef.current += data.length;
+      setHasMore(offsetRef.current < total);
+    } catch {
+      // silently fail on load more
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore]);
 
-  return { posts, loading, error, refetch: load };
+  useEffect(() => { loadInitial(); }, [loadInitial]);
+
+  return { posts, loading, loadingMore, error, hasMore, loadMore, refetch: loadInitial };
 }

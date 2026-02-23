@@ -44,7 +44,7 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ p
       )}
 
       <div
-        className="font-inter text-[clamp(13px,1.4vw,16px)] text-white leading-[140%]"
+        className="post-content font-inter text-[clamp(13px,1.4vw,16px)] text-white leading-[140%]"
         dangerouslySetInnerHTML={{ __html: post.description }}
       />
 

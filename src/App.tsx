@@ -10,6 +10,16 @@ import coinImage from './assets/coin.png';
 const preload = new Image();
 preload.src = coinImage;
 
+// Global vibration on all interactive element taps
+function vibrate() {
+  try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light'); } catch {}
+  try { navigator.vibrate?.(10); } catch {}
+}
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  if (target.closest('button, a, [role="button"]')) vibrate();
+}, { passive: true });
+
 const BASE_ENERGY = 50;
 const UNLOCKED_ENERGY = 100;
 const ENERGY_REGEN_MS = 2 * 60 * 1000; // 1 energy per 2 minutes
@@ -47,8 +57,8 @@ function App() {
   const [energy, setEnergy] = useState(() =>
     calcOfflineRegen(loadNumber('energy', maxEnergy), loadNumber('energyTimestamp', 0), maxEnergy)
   );
-  const { posts, loading: postsLoading, error: postsError, refetch: refetchPosts } = usePosts();
-  const { markAsRead, unreadCount } = useReadPosts();
+  const { posts, loading: postsLoading, loadingMore, error: postsError, hasMore, loadMore, refetch: refetchPosts } = usePosts();
+  const { readIds, markAsRead, unreadCount } = useReadPosts();
   const unread = unreadCount(posts.map(p => p.id));
 
   // Persist balance
@@ -108,9 +118,13 @@ function App() {
           onTabChange={handleTabChange}
           posts={posts}
           postsLoading={postsLoading}
+          loadingMore={loadingMore}
           postsError={postsError}
+          hasMore={hasMore}
+          loadMore={loadMore}
           refetchPosts={refetchPosts}
           markAsRead={markAsRead}
+          readIds={readIds}
           unreadCount={unread}
         />
       )}

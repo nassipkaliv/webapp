@@ -19,6 +19,73 @@ function isAdmin(chatId: number): boolean {
   return ADMIN_IDS.includes(chatId);
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** Convert Telegram message entities to HTML */
+function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
+  if (!entities || entities.length === 0) return escapeHtml(text).replace(/\n/g, '<br>');
+
+  const sorted = [...entities].sort((a, b) => a.offset - b.offset);
+  let result = '';
+  let lastOffset = 0;
+
+  for (const entity of sorted) {
+    if (entity.offset > lastOffset) {
+      result += escapeHtml(text.slice(lastOffset, entity.offset));
+    }
+
+    const content = text.slice(entity.offset, entity.offset + entity.length);
+    const escaped = escapeHtml(content);
+
+    switch (entity.type) {
+      case 'bold':
+        result += `<b>${escaped}</b>`;
+        break;
+      case 'italic':
+        result += `<i>${escaped}</i>`;
+        break;
+      case 'underline':
+        result += `<u>${escaped}</u>`;
+        break;
+      case 'strikethrough':
+        result += `<s>${escaped}</s>`;
+        break;
+      case 'code':
+        result += `<code>${escaped}</code>`;
+        break;
+      case 'pre':
+        result += `<pre>${escaped}</pre>`;
+        break;
+      case 'text_link':
+        result += `<a href="${entity.url}">${escaped}</a>`;
+        break;
+      case 'url':
+        result += `<a href="${content}">${escaped}</a>`;
+        break;
+      default:
+        result += escaped;
+        break;
+    }
+
+    lastOffset = entity.offset + entity.length;
+  }
+
+  if (lastOffset < text.length) {
+    result += escapeHtml(text.slice(lastOffset));
+  }
+
+  return result.replace(/\n/g, '<br>');
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '');
+}
+
 export function registerHandlers(bot: TelegramBot) {
   // /start
   bot.onText(/\/start/, (msg) => {
@@ -47,9 +114,12 @@ export function registerHandlers(bot: TelegramBot) {
   bot.onText(/\/newpost/, (msg) => {
     if (!isAdmin(msg.chat.id)) return;
     const session = getSession(msg.chat.id);
-    session.step = 'awaiting_title';
+    session.step = 'awaiting_text';
     session.postDraft = {};
-    bot.sendMessage(msg.chat.id, '📝 Step 1/9: Send the post TITLE:');
+    bot.sendMessage(msg.chat.id,
+      '📝 Send the post text.\n' +
+      'Formatting is supported: bold, italic, underline, etc.'
+    );
   });
 
   // /listposts
@@ -61,7 +131,7 @@ export function registerHandlers(bot: TelegramBot) {
       return;
     }
     const list = posts.map((p: PostRow) =>
-      `#${p.id} — ${p.title} (❤️ ${p.like_count})`
+      `#${p.id} — ${stripHtml(p.description).substring(0, 40)}... (❤️ ${p.like_count})`
     ).join('\n');
     bot.sendMessage(msg.chat.id, `📋 Posts:\n${list}`);
   });
@@ -79,10 +149,9 @@ export function registerHandlers(bot: TelegramBot) {
     session.step = 'awaiting_edit_field';
     session.editPostId = id;
     bot.sendMessage(msg.chat.id,
-      `✏️ Editing post #${id} "${post.title}".\n\n` +
+      `✏️ Editing post #${id}.\n\n` +
       'Which field to edit?\n' +
-      'title, description, whyTitle, whyItems, image, detailsText, ' +
-      'telegramLink, whatsappLink, instagramLink\n\n' +
+      'text, image, details\n\n' +
       'Send the field name:'
     );
   });
@@ -100,11 +169,11 @@ export function registerHandlers(bot: TelegramBot) {
     session.step = 'awaiting_delete_confirm';
     session.editPostId = id;
     bot.sendMessage(msg.chat.id,
-      `🗑 Delete post #${id} "${post.title}"?\nSend YES to confirm:`
+      `🗑 Delete post #${id}?\nSend YES to confirm:`
     );
   });
 
-  // Handle text messages for conversational flow
+  // Handle text messages
   bot.on('message', (msg) => {
     if (!msg.text || msg.text.startsWith('/') || !isAdmin(msg.chat.id)) return;
 
@@ -112,81 +181,34 @@ export function registerHandlers(bot: TelegramBot) {
     const text = msg.text.trim();
 
     switch (session.step) {
-      case 'awaiting_title':
-        session.postDraft.title = text;
-        session.step = 'awaiting_description';
-        bot.sendMessage(msg.chat.id, '📝 Step 2/9: Send the DESCRIPTION:');
-        break;
-
-      case 'awaiting_description':
-        session.postDraft.description = text;
-        session.step = 'awaiting_why_title';
-        bot.sendMessage(msg.chat.id,
-          '📝 Step 3/9: Send the "Why" section TITLE (or "skip" for default):'
-        );
-        break;
-
-      case 'awaiting_why_title':
-        session.postDraft.whyTitle = text.toLowerCase() === 'skip' ? 'Why Choose Us' : text;
-        session.step = 'awaiting_why_items';
-        bot.sendMessage(msg.chat.id,
-          '📝 Step 4/9: Send list items, one per line:'
-        );
-        break;
-
-      case 'awaiting_why_items':
-        if (text.toLowerCase() === 'skip') {
-          session.postDraft.whyItems = [];
-        } else {
-          session.postDraft.whyItems = text.split('\n').map(s => s.trim()).filter(Boolean);
-        }
+      case 'awaiting_text': {
+        session.postDraft.text = messageToHtml(msg.text, msg.entities);
         session.step = 'awaiting_image';
         bot.sendMessage(msg.chat.id,
-          '📷 Step 5/9: Send a PHOTO (or "skip"):'
+          '📷 Send a PHOTO, or type "skip" to publish without image:'
         );
         break;
+      }
 
       case 'awaiting_image':
         if (text.toLowerCase() === 'skip') {
           session.postDraft.imageUrl = '';
-          session.step = 'awaiting_details_text';
-          bot.sendMessage(msg.chat.id, '📝 Step 6/9: Send DETAILS TEXT for modal (or "skip"):');
+          session.step = 'awaiting_details';
+          bot.sendMessage(msg.chat.id,
+            '📝 Send DETAILS text for the modal (or "skip"):'
+          );
         }
         break;
 
-      case 'awaiting_details_text':
-        session.postDraft.detailsText = text.toLowerCase() === 'skip' ? '' : text;
-        session.step = 'awaiting_telegram_link';
-        bot.sendMessage(msg.chat.id, '📝 Step 7/9: Send TELEGRAM link (or "skip"):');
-        break;
-
-      case 'awaiting_telegram_link':
-        session.postDraft.telegramLink = text.toLowerCase() === 'skip' ? '' : text;
-        session.step = 'awaiting_whatsapp_link';
-        bot.sendMessage(msg.chat.id, '📝 Step 8/9: Send WHATSAPP link (or "skip"):');
-        break;
-
-      case 'awaiting_whatsapp_link':
-        session.postDraft.whatsappLink = text.toLowerCase() === 'skip' ? '' : text;
-        session.step = 'awaiting_instagram_link';
-        bot.sendMessage(msg.chat.id, '📝 Step 9/9: Send INSTAGRAM link (or "skip"):');
-        break;
-
-      case 'awaiting_instagram_link': {
-        session.postDraft.instagramLink = text.toLowerCase() === 'skip' ? '' : text;
+      case 'awaiting_details': {
+        session.postDraft.detailsText = text.toLowerCase() === 'skip' ? '' : messageToHtml(msg.text, msg.entities);
         session.step = 'confirm_create';
         const d = session.postDraft;
         bot.sendMessage(msg.chat.id,
-          `📋 Post summary:\n\n` +
-          `Title: ${d.title}\n` +
-          `Description: ${d.description?.substring(0, 100)}...\n` +
-          `Why title: ${d.whyTitle}\n` +
-          `Why items: ${d.whyItems?.length || 0} items\n` +
+          `📋 Post preview:\n\n` +
+          `Text: ${stripHtml(d.text || '').substring(0, 100)}...\n` +
           `Image: ${d.imageUrl ? '✅' : '❌'}\n` +
-          `Details: ${d.detailsText ? '✅' : '❌'}\n` +
-          `TG: ${d.telegramLink || '—'}\n` +
-          `WA: ${d.whatsappLink || '—'}\n` +
-          `IG: ${d.instagramLink || '—'}\n\n` +
+          `Details: ${d.detailsText ? '✅' : '❌'}\n\n` +
           `Send YES to publish, or /cancel.`
         );
         break;
@@ -195,14 +217,8 @@ export function registerHandlers(bot: TelegramBot) {
       case 'confirm_create':
         if (text.toUpperCase() === 'YES') {
           const post = createPost({
-            title: session.postDraft.title!,
-            description: session.postDraft.description!,
-            whyTitle: session.postDraft.whyTitle || 'Why Choose Us',
-            whyItems: session.postDraft.whyItems || [],
+            description: session.postDraft.text || '',
             imageUrl: session.postDraft.imageUrl || '',
-            telegramLink: session.postDraft.telegramLink || '',
-            whatsappLink: session.postDraft.whatsappLink || '',
-            instagramLink: session.postDraft.instagramLink || '',
             detailsText: session.postDraft.detailsText || '',
           });
           resetSession(msg.chat.id);
@@ -214,26 +230,32 @@ export function registerHandlers(bot: TelegramBot) {
         break;
 
       case 'awaiting_edit_field':
-        session.editField = text;
+        session.editField = text.toLowerCase();
         session.step = 'awaiting_edit_value';
-        if (text === 'image') {
+        if (session.editField === 'image') {
           bot.sendMessage(msg.chat.id, '📷 Send the new photo:');
-        } else if (text === 'whyItems') {
-          bot.sendMessage(msg.chat.id, '📝 Send new list items, one per line:');
+        } else if (session.editField === 'text') {
+          bot.sendMessage(msg.chat.id, '📝 Send new text (with formatting):');
+        } else if (session.editField === 'details') {
+          bot.sendMessage(msg.chat.id, '📝 Send new details text (with formatting):');
         } else {
-          bot.sendMessage(msg.chat.id, `📝 Send new value for "${text}":`);
+          bot.sendMessage(msg.chat.id, '❌ Unknown field. Use: text, image, details');
+          resetSession(msg.chat.id);
         }
         break;
 
       case 'awaiting_edit_value': {
         const field = session.editField!;
         const editId = session.editPostId!;
-        let value: string | string[] = text;
-        if (field === 'whyItems') {
-          value = text.split('\n').map(s => s.trim()).filter(Boolean);
+        if (field === 'text') {
+          const html = messageToHtml(msg.text, msg.entities);
+          updatePost(editId, { description: html });
+          bot.sendMessage(msg.chat.id, `✅ Post #${editId} text updated!`);
+        } else if (field === 'details') {
+          const html = messageToHtml(msg.text, msg.entities);
+          updatePost(editId, { detailsText: html });
+          bot.sendMessage(msg.chat.id, `✅ Post #${editId} details updated!`);
         }
-        updatePost(editId, { [field]: value });
-        bot.sendMessage(msg.chat.id, `✅ Post #${editId} updated! Field "${field}" changed.`);
         resetSession(msg.chat.id);
         break;
       }
@@ -284,9 +306,15 @@ export function registerHandlers(bot: TelegramBot) {
       const imageUrl = `/uploads/${filename}`;
 
       if (session.step === 'awaiting_image') {
+        // Capture caption as text if provided with the photo
+        if (msg.caption && !session.postDraft.text) {
+          session.postDraft.text = messageToHtml(msg.caption, msg.caption_entities);
+        }
         session.postDraft.imageUrl = imageUrl;
-        session.step = 'awaiting_details_text';
-        bot.sendMessage(msg.chat.id, '✅ Image saved!\n📝 Step 6/9: Send DETAILS TEXT for modal (or "skip"):');
+        session.step = 'awaiting_details';
+        bot.sendMessage(msg.chat.id,
+          '✅ Image saved!\n📝 Send DETAILS text for the modal (or "skip"):'
+        );
       } else {
         const editId = session.editPostId!;
         updatePost(editId, { imageUrl });

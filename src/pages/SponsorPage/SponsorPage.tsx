@@ -28,7 +28,7 @@ function SponsorPage({ onTabChange, posts, postsLoading, postsError, refetchPost
       <div className="sticky top-0 z-[10] bg-[#190503] px-[clamp(12px,4vw,48px)] pt-4 pb-3">
         <div className="relative flex items-center justify-between">
           <button
-            className="text-white text-[24px] leading-none active:scale-90 transition-transform duration-100 shrink-0 z-[1] px-3 py-3 -ml-3"
+            className="text-white text-[24px] leading-none active:scale-90 transition-transform duration-100 shrink-0 z-[1] px-10 py-6 -ml-10 -my-4"
             onClick={() => onTabChange('home')}
           >
             <svg width="14" height="25" viewBox="0 0 14 25" fill="none" xmlns="http://www.w3.org/2000/svg">

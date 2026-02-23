@@ -34,8 +34,8 @@ function HomePage({ balance, setBalance, energy, setEnergy, maxEnergy, onTabChan
   };
 
   return (
-    <div className="h-dvh flex flex-col relative bg-gradient-to-b from-black to-[#b42115] overflow-hidden">
-      <main className="flex-1 flex flex-col items-center justify-center px-[clamp(12px,4vw,40px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1] gap-[clamp(24px,3vw,48px)] max-w-[480px] mx-auto w-full">
+    <div className="min-h-dvh flex flex-col relative bg-gradient-to-b from-black to-[#b42115]">
+      <main className="flex-1 flex flex-col items-center justify-center px-[clamp(12px,4vw,40px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1] gap-[clamp(12px,2vh,48px)] max-w-[480px] mx-auto w-full">
         <BalanceHeader amount={balance.toFixed(2)} currency={t.currency} />
         <CoinHero onTap={handleCoinTap} />
         <EnergyBar current={energy} max={maxEnergy} onPlusClick={sponsorUnlocked ? undefined : () => setShowModal(true)} />

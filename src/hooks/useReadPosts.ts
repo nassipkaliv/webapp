@@ -40,10 +40,11 @@ export function useReadPosts() {
 
 /**
  * Hook that creates an IntersectionObserver ref callback.
- * When a post card scrolls into view (50%+ visible for 1s), it marks as read.
+ * When a post card scrolls into view (30%+ visible for 500ms), it marks as read.
  */
 export function usePostVisibilityTracker(markAsRead: (id: number) => void) {
   const timers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const elements = useRef<Set<HTMLDivElement>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -54,16 +55,14 @@ export function usePostVisibilityTracker(markAsRead: (id: number) => void) {
           if (isNaN(postId)) return;
 
           if (entry.isIntersecting) {
-            // Start a 1s timer — if still visible after 1s, mark as read
             if (!timers.current.has(postId)) {
               const timer = setTimeout(() => {
                 markAsRead(postId);
                 timers.current.delete(postId);
-              }, 1000);
+              }, 500);
               timers.current.set(postId, timer);
             }
           } else {
-            // Scrolled away before 1s — cancel
             const timer = timers.current.get(postId);
             if (timer) {
               clearTimeout(timer);
@@ -72,8 +71,11 @@ export function usePostVisibilityTracker(markAsRead: (id: number) => void) {
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
+
+    // Re-observe all tracked elements when observer is recreated
+    elements.current.forEach(el => observerRef.current?.observe(el));
 
     return () => {
       observerRef.current?.disconnect();
@@ -84,8 +86,9 @@ export function usePostVisibilityTracker(markAsRead: (id: number) => void) {
 
   /** Attach this ref callback to each PostCard wrapper */
   const observeRef = useCallback((el: HTMLDivElement | null) => {
-    if (!el || !observerRef.current) return;
-    observerRef.current.observe(el);
+    if (!el) return;
+    elements.current.add(el);
+    observerRef.current?.observe(el);
   }, []);
 
   return observeRef;

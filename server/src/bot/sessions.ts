@@ -1,14 +1,8 @@
 export type BotStep =
   | 'idle'
-  | 'awaiting_title'
-  | 'awaiting_description'
-  | 'awaiting_why_title'
-  | 'awaiting_why_items'
+  | 'awaiting_text'
   | 'awaiting_image'
-  | 'awaiting_details_text'
-  | 'awaiting_telegram_link'
-  | 'awaiting_whatsapp_link'
-  | 'awaiting_instagram_link'
+  | 'awaiting_details'
   | 'confirm_create'
   | 'awaiting_edit_field'
   | 'awaiting_edit_value'
@@ -17,15 +11,9 @@ export type BotStep =
 export interface BotSession {
   step: BotStep;
   postDraft: {
-    title?: string;
-    description?: string;
-    whyTitle?: string;
-    whyItems?: string[];
+    text?: string;
     imageUrl?: string;
     detailsText?: string;
-    telegramLink?: string;
-    whatsappLink?: string;
-    instagramLink?: string;
   };
   editPostId?: number;
   editField?: string;

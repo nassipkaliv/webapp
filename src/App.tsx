@@ -4,6 +4,11 @@ import WithdrawPage from './pages/WithdrawPage/WithdrawPage';
 import SponsorPage from './pages/SponsorPage/SponsorPage';
 import { usePosts } from './hooks/usePosts';
 import { useReadPosts } from './hooks/useReadPosts';
+import coinImage from './assets/coin.png';
+
+// Preload coin image so it's cached before any page renders it
+const preload = new Image();
+preload.src = coinImage;
 
 const BASE_ENERGY = 50;
 const UNLOCKED_ENERGY = 100;

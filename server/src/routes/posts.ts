@@ -35,15 +35,9 @@ const upload = multer({
 function transformPost(row: PostRow) {
   return {
     id: row.id,
-    title: row.title,
     description: row.description,
-    whyTitle: row.why_title,
-    whyItems: JSON.parse(row.why_items || '[]') as string[],
-    imageUrl: row.image_url,
-    telegramLink: row.telegram_link,
-    whatsappLink: row.whatsapp_link,
-    instagramLink: row.instagram_link,
     detailsText: row.details_text,
+    imageUrl: row.image_url,
     likeCount: row.like_count,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -68,24 +62,16 @@ router.get('/:id', (req: Request, res: Response) => {
 
 // POST /api/posts
 router.post('/', (req: Request, res: Response) => {
-  const { title, description, whyTitle, whyItems, imageUrl,
-    telegramLink, whatsappLink, instagramLink, detailsText } = req.body;
+  const { description, imageUrl } = req.body;
 
-  if (!title || !description) {
-    res.status(400).json({ success: false, error: 'title and description are required' });
+  if (!description) {
+    res.status(400).json({ success: false, error: 'description is required' });
     return;
   }
 
   const post = createPost({
-    title,
     description,
-    whyTitle: whyTitle || 'Why Choose Us',
-    whyItems: whyItems || [],
     imageUrl: imageUrl || '',
-    telegramLink: telegramLink || '',
-    whatsappLink: whatsappLink || '',
-    instagramLink: instagramLink || '',
-    detailsText: detailsText || '',
   });
 
   if (!post) {

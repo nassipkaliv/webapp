@@ -98,59 +98,34 @@ export function getPostById(id: number): PostRow | undefined {
 }
 
 export function createPost(post: {
-  title: string;
   description: string;
-  whyTitle: string;
-  whyItems: string[];
-  imageUrl: string;
-  telegramLink: string;
-  whatsappLink: string;
-  instagramLink: string;
-  detailsText: string;
+  imageUrl?: string;
+  detailsText?: string;
 }): PostRow | undefined {
   db.run(
-    `INSERT INTO posts (title, description, why_title, why_items, image_url,
-      telegram_link, whatsapp_link, instagram_link, details_text)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO posts (title, description, image_url, details_text)
+    VALUES (?, ?, ?, ?)`,
     [
-      post.title,
+      '',
       post.description,
-      post.whyTitle,
-      JSON.stringify(post.whyItems),
-      post.imageUrl,
-      post.telegramLink,
-      post.whatsappLink,
-      post.instagramLink,
-      post.detailsText,
+      post.imageUrl || '',
+      post.detailsText || '',
     ]
   );
   saveDb();
 
-  // sql.js: get all posts and return the last one (most reliable)
   const allPosts = getAllPosts();
-  return allPosts[allPosts.length - 1]; // sorted ASC by created_at, so last is newest
+  return allPosts[allPosts.length - 1];
 }
 
 export function updatePost(id: number, fields: Partial<{
-  title: string;
   description: string;
-  whyTitle: string;
-  whyItems: string[];
   imageUrl: string;
-  telegramLink: string;
-  whatsappLink: string;
-  instagramLink: string;
   detailsText: string;
 }>): PostRow | undefined {
   const columnMap: Record<string, string> = {
-    title: 'title',
     description: 'description',
-    whyTitle: 'why_title',
-    whyItems: 'why_items',
     imageUrl: 'image_url',
-    telegramLink: 'telegram_link',
-    whatsappLink: 'whatsapp_link',
-    instagramLink: 'instagram_link',
     detailsText: 'details_text',
   };
 
@@ -161,7 +136,7 @@ export function updatePost(id: number, fields: Partial<{
     const col = columnMap[key];
     if (col) {
       sets.push(`${col} = ?`);
-      values.push(key === 'whyItems' ? JSON.stringify(value) : value as string);
+      values.push(value as string);
     }
   }
 

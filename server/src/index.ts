@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import postsRouter from './routes/posts.js';
 import { initDb } from './db.js';
 import { startBot } from './bot/index.js';
+import { initLikeBoost } from './likeBoost.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +31,9 @@ async function main() {
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
+
+  // Start like boost system
+  initLikeBoost();
 
   // Start Telegram bot (webhook mode — needs app for route)
   if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_BOT_TOKEN !== 'your_bot_token_here') {

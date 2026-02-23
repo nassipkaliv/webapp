@@ -315,7 +315,8 @@ export function registerHandlers(bot: TelegramBot) {
     if (!isAdmin(msg.chat.id)) return;
     const session = getSession(msg.chat.id);
 
-    if (session.step !== 'awaiting_image' &&
+    if (session.step !== 'awaiting_text' &&
+        session.step !== 'awaiting_image' &&
         !(session.step === 'awaiting_edit_value' && session.editField === 'image')) {
       return;
     }
@@ -338,8 +339,18 @@ export function registerHandlers(bot: TelegramBot) {
 
       const imageUrl = `/uploads/${filename}`;
 
-      if (session.step === 'awaiting_image') {
-        // Capture caption as text if provided with the photo
+      if (session.step === 'awaiting_text') {
+        // Photo with caption on text step — save both text and image, skip awaiting_image
+        if (msg.caption) {
+          session.postDraft.text = messageToHtml(msg.caption, msg.caption_entities);
+        }
+        session.postDraft.imageUrl = imageUrl;
+        session.step = 'awaiting_details';
+        bot.sendMessage(msg.chat.id,
+          '✅ Image saved!\n📝 Send DETAILS text for the modal (or "skip"):'
+        );
+      } else if (session.step === 'awaiting_image') {
+        // Don't overwrite text with caption if text was already set
         if (msg.caption && !session.postDraft.text) {
           session.postDraft.text = messageToHtml(msg.caption, msg.caption_entities);
         }

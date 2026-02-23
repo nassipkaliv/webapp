@@ -7,11 +7,11 @@ interface CoinHeroProps {
 function CoinHero({ onTap }: CoinHeroProps) {
   return (
     <div className="relative py-[clamp(8px,2vh,24px)] flex items-center justify-center w-full">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0" />
       <img
         src={coinImage}
         alt="Euro coin"
-        className="w-[clamp(140px,35vh,400px)] h-auto relative z-[1] select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)] cursor-pointer active:scale-95 transition-transform duration-100 pointer-events-auto"
+        className="w-[clamp(140px,35vh,400px)] h-auto relative z-[1] select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)] cursor-pointer active:scale-95 transition-transform duration-100 pointer-events-auto outline-none"
+        tabIndex={-1}
         draggable={false}
         onClick={onTap}
         onContextMenu={(e) => e.preventDefault()}

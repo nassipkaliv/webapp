@@ -25,6 +25,8 @@ function WithdrawPage({ balance, onTabChange, sponsorUnlocked, sponsorBadge }: W
           alt={t.withdraw.euroCoinAlt}
           className="w-[clamp(100px,25vh,340px)] h-auto select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
           draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+          style={{ WebkitTouchCallout: 'none' } as React.CSSProperties}
         />
 
         <span className="font-inter font-black text-[clamp(28px,3.5vw,40px)] leading-[100%] text-center text-white">

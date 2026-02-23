@@ -3,6 +3,9 @@ export type BotStep =
   | 'awaiting_text'
   | 'awaiting_image'
   | 'awaiting_details'
+  | 'awaiting_telegram_link'
+  | 'awaiting_whatsapp_link'
+  | 'awaiting_instagram_link'
   | 'confirm_create'
   | 'awaiting_edit_field'
   | 'awaiting_edit_value'
@@ -14,6 +17,9 @@ export interface BotSession {
     text?: string;
     imageUrl?: string;
     detailsText?: string;
+    telegramLink?: string;
+    whatsappLink?: string;
+    instagramLink?: string;
   };
   editPostId?: number;
   editField?: string;

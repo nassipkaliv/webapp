@@ -116,10 +116,7 @@ export function registerHandlers(bot: TelegramBot) {
     const session = getSession(msg.chat.id);
     session.step = 'awaiting_text';
     session.postDraft = {};
-    bot.sendMessage(msg.chat.id,
-      '📝 Send the post text.\n' +
-      'Formatting is supported: bold, italic, underline, etc.'
-    );
+    bot.sendMessage(msg.chat.id, '📝 Send the post text:');
   });
 
   // /listposts
@@ -151,7 +148,7 @@ export function registerHandlers(bot: TelegramBot) {
     bot.sendMessage(msg.chat.id,
       `✏️ Editing post #${id}.\n\n` +
       'Which field to edit?\n' +
-      'text, image, details\n\n' +
+      'text, image, details, telegram, whatsapp, instagram\n\n' +
       'Send the field name:'
     );
   });
@@ -202,13 +199,35 @@ export function registerHandlers(bot: TelegramBot) {
 
       case 'awaiting_details': {
         session.postDraft.detailsText = text.toLowerCase() === 'skip' ? '' : messageToHtml(msg.text, msg.entities);
+        session.step = 'awaiting_telegram_link';
+        bot.sendMessage(msg.chat.id, '🔗 Send TELEGRAM link (or "skip"):');
+        break;
+      }
+
+      case 'awaiting_telegram_link':
+        session.postDraft.telegramLink = text.toLowerCase() === 'skip' ? '' : text;
+        session.step = 'awaiting_whatsapp_link';
+        bot.sendMessage(msg.chat.id, '🔗 Send WHATSAPP link (or "skip"):');
+        break;
+
+      case 'awaiting_whatsapp_link':
+        session.postDraft.whatsappLink = text.toLowerCase() === 'skip' ? '' : text;
+        session.step = 'awaiting_instagram_link';
+        bot.sendMessage(msg.chat.id, '🔗 Send INSTAGRAM link (or "skip"):');
+        break;
+
+      case 'awaiting_instagram_link': {
+        session.postDraft.instagramLink = text.toLowerCase() === 'skip' ? '' : text;
         session.step = 'confirm_create';
         const d = session.postDraft;
         bot.sendMessage(msg.chat.id,
           `📋 Post preview:\n\n` +
           `Text: ${stripHtml(d.text || '').substring(0, 100)}...\n` +
           `Image: ${d.imageUrl ? '✅' : '❌'}\n` +
-          `Details: ${d.detailsText ? '✅' : '❌'}\n\n` +
+          `Details: ${d.detailsText ? '✅' : '❌'}\n` +
+          `TG: ${d.telegramLink || '—'}\n` +
+          `WA: ${d.whatsappLink || '—'}\n` +
+          `IG: ${d.instagramLink || '—'}\n\n` +
           `Send YES to publish, or /cancel.`
         );
         break;
@@ -220,6 +239,9 @@ export function registerHandlers(bot: TelegramBot) {
             description: session.postDraft.text || '',
             imageUrl: session.postDraft.imageUrl || '',
             detailsText: session.postDraft.detailsText || '',
+            telegramLink: session.postDraft.telegramLink || '',
+            whatsappLink: session.postDraft.whatsappLink || '',
+            instagramLink: session.postDraft.instagramLink || '',
           });
           resetSession(msg.chat.id);
           bot.sendMessage(msg.chat.id, `✅ Post created! ID #${post?.id}`);
@@ -235,11 +257,13 @@ export function registerHandlers(bot: TelegramBot) {
         if (session.editField === 'image') {
           bot.sendMessage(msg.chat.id, '📷 Send the new photo:');
         } else if (session.editField === 'text') {
-          bot.sendMessage(msg.chat.id, '📝 Send new text (with formatting):');
+          bot.sendMessage(msg.chat.id, '📝 Send new text:');
         } else if (session.editField === 'details') {
-          bot.sendMessage(msg.chat.id, '📝 Send new details text (with formatting):');
+          bot.sendMessage(msg.chat.id, '📝 Send new details text:');
+        } else if (['telegram', 'whatsapp', 'instagram'].includes(session.editField)) {
+          bot.sendMessage(msg.chat.id, `🔗 Send new ${session.editField} link:`);
         } else {
-          bot.sendMessage(msg.chat.id, '❌ Unknown field. Use: text, image, details');
+          bot.sendMessage(msg.chat.id, '❌ Unknown field. Use: text, image, details, telegram, whatsapp, instagram');
           resetSession(msg.chat.id);
         }
         break;
@@ -255,6 +279,15 @@ export function registerHandlers(bot: TelegramBot) {
           const html = messageToHtml(msg.text, msg.entities);
           updatePost(editId, { detailsText: html });
           bot.sendMessage(msg.chat.id, `✅ Post #${editId} details updated!`);
+        } else if (field === 'telegram') {
+          updatePost(editId, { telegramLink: text });
+          bot.sendMessage(msg.chat.id, `✅ Post #${editId} telegram link updated!`);
+        } else if (field === 'whatsapp') {
+          updatePost(editId, { whatsappLink: text });
+          bot.sendMessage(msg.chat.id, `✅ Post #${editId} whatsapp link updated!`);
+        } else if (field === 'instagram') {
+          updatePost(editId, { instagramLink: text });
+          bot.sendMessage(msg.chat.id, `✅ Post #${editId} instagram link updated!`);
         }
         resetSession(msg.chat.id);
         break;

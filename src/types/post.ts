@@ -3,6 +3,9 @@ export interface Post {
   description: string;
   detailsText: string;
   imageUrl: string;
+  telegramLink: string;
+  whatsappLink: string;
+  instagramLink: string;
   likeCount: number;
   createdAt: string;
   updatedAt: string;

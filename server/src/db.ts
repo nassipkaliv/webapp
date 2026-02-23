@@ -101,15 +101,21 @@ export function createPost(post: {
   description: string;
   imageUrl?: string;
   detailsText?: string;
+  telegramLink?: string;
+  whatsappLink?: string;
+  instagramLink?: string;
 }): PostRow | undefined {
   db.run(
-    `INSERT INTO posts (title, description, image_url, details_text)
-    VALUES (?, ?, ?, ?)`,
+    `INSERT INTO posts (title, description, image_url, details_text, telegram_link, whatsapp_link, instagram_link)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       '',
       post.description,
       post.imageUrl || '',
       post.detailsText || '',
+      post.telegramLink || '',
+      post.whatsappLink || '',
+      post.instagramLink || '',
     ]
   );
   saveDb();
@@ -122,11 +128,17 @@ export function updatePost(id: number, fields: Partial<{
   description: string;
   imageUrl: string;
   detailsText: string;
+  telegramLink: string;
+  whatsappLink: string;
+  instagramLink: string;
 }>): PostRow | undefined {
   const columnMap: Record<string, string> = {
     description: 'description',
     imageUrl: 'image_url',
     detailsText: 'details_text',
+    telegramLink: 'telegram_link',
+    whatsappLink: 'whatsapp_link',
+    instagramLink: 'instagram_link',
   };
 
   const sets: string[] = [];

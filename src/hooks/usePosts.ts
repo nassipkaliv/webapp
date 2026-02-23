@@ -11,6 +11,8 @@ export function usePosts() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const offsetRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+  const hasMoreRef = useRef(true);
 
   const loadInitial = useCallback(async () => {
     setLoading(true);
@@ -20,17 +22,21 @@ export function usePosts() {
       const { posts: data, total } = await fetchPostsPaginated(PAGE_SIZE, 0);
       setPosts(data);
       offsetRef.current = data.length;
-      setHasMore(data.length < total);
+      const more = data.length < total;
+      setHasMore(more);
+      hasMoreRef.current = more;
     } catch {
       setPosts([]);
       setHasMore(false);
+      hasMoreRef.current = false;
     } finally {
       setLoading(false);
     }
   }, []);
 
   const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
+    if (loadingMoreRef.current || !hasMoreRef.current) return;
+    loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
       const { posts: data, total } = await fetchPostsPaginated(PAGE_SIZE, offsetRef.current);
@@ -40,13 +46,16 @@ export function usePosts() {
         return [...prev, ...newPosts];
       });
       offsetRef.current += data.length;
-      setHasMore(offsetRef.current < total);
+      const more = offsetRef.current < total;
+      setHasMore(more);
+      hasMoreRef.current = more;
     } catch {
       // silently fail on load more
     } finally {
+      loadingMoreRef.current = false;
       setLoadingMore(false);
     }
-  }, [loadingMore, hasMore]);
+  }, []);
 
   useEffect(() => { loadInitial(); }, [loadInitial]);
 

@@ -81,14 +81,14 @@ function rowsToObjects(result: initSqlJs.QueryExecResult[]): PostRow[] {
 }
 
 export function getAllPosts(): PostRow[] {
-  const result = db.exec('SELECT * FROM posts ORDER BY created_at ASC');
+  const result = db.exec('SELECT * FROM posts ORDER BY created_at DESC');
   return rowsToObjects(result);
 }
 
 export function getPostsPaginated(limit: number, offset: number): { posts: PostRow[]; total: number } {
   const countResult = db.exec('SELECT COUNT(*) as cnt FROM posts');
   const total = countResult.length ? (countResult[0]!.values[0]![0] as number) : 0;
-  const result = db.exec(`SELECT * FROM posts ORDER BY created_at ASC LIMIT ${limit} OFFSET ${offset}`);
+  const result = db.exec(`SELECT * FROM posts ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
   return { posts: rowsToObjects(result), total };
 }
 

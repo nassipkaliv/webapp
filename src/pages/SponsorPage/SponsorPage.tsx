@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import DetailsModal from '../../components/DetailsModal/DetailsModal';
 import ChannelModal from '../../components/ChannelModal/ChannelModal';
@@ -30,23 +30,32 @@ function SponsorPage({ onTabChange, posts, postsLoading, loadingMore, postsError
   const hasScrolled = useRef(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to first unread post on mount
+  // On mount: scroll to last unread post (near the bottom), or just scroll to bottom
   useEffect(() => {
     if (hasScrolled.current || postsLoading || posts.length === 0) return;
     hasScrolled.current = true;
 
-    const firstUnreadPost = posts.find(p => !readIds.has(p.id));
-    if (!firstUnreadPost) return;
-
     requestAnimationFrame(() => {
-      const el = scrollContainerRef.current?.querySelector(
-        `[data-post-id="${firstUnreadPost.id}"]`
-      );
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      // Find the last unread post (newest unread = last in ASC list)
+      const unreadPosts = posts.filter(p => !readIds.has(p.id));
+      if (unreadPosts.length > 0) {
+        const lastUnread = unreadPosts[unreadPosts.length - 1]!;
+        const el = container.querySelector(`[data-post-id="${lastUnread.id}"]`);
+        if (el) {
+          el.scrollIntoView({ block: 'center' });
+          return;
+        }
+      }
+
+      // If all read, scroll to bottom
+      container.scrollTop = container.scrollHeight;
     });
   }, [posts, postsLoading, readIds]);
 
-  // Infinite scroll — observe sentinel element
+  // Infinite scroll UP — observe sentinel at top to load older posts
   const loadMoreRef = useRef(loadMore);
   loadMoreRef.current = loadMore;
   const hasMoreRef = useRef(hasMore);
@@ -59,10 +68,23 @@ function SponsorPage({ onTabChange, posts, postsLoading, loadingMore, postsError
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting && hasMoreRef.current) {
+          // Save scroll position before prepending
+          const container = scrollContainerRef.current;
+          const prevHeight = container?.scrollHeight ?? 0;
+          const prevTop = container?.scrollTop ?? 0;
+
+          const restore = () => {
+            if (!container) return;
+            const newHeight = container.scrollHeight;
+            container.scrollTop = prevTop + (newHeight - prevHeight);
+          };
+
           loadMoreRef.current();
+          // Restore scroll after DOM updates
+          requestAnimationFrame(restore);
         }
       },
-      { root: scrollContainerRef.current, rootMargin: '200px' }
+      { root: scrollContainerRef.current, rootMargin: '300px' }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -103,6 +125,15 @@ function SponsorPage({ onTabChange, posts, postsLoading, loadingMore, postsError
 
       <main className="flex flex-col px-[clamp(12px,4vw,48px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1]">
         <div className="flex flex-col gap-4 max-w-[600px] mx-auto w-full pt-4 pb-4">
+          {/* Sentinel at top for loading older posts */}
+          <div ref={sentinelRef} className="h-1" />
+
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
+
           {postsLoading && (
             <div className="flex justify-center py-12">
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -135,15 +166,6 @@ function SponsorPage({ onTabChange, posts, postsLoading, loadingMore, postsError
               onDetailsClick={(p) => setSelectedPost(p)}
             />
           ))}
-
-          {/* Sentinel for infinite scroll */}
-          <div ref={sentinelRef} className="h-1" />
-
-          {loadingMore && (
-            <div className="flex justify-center py-4">
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            </div>
-          )}
         </div>
 
         {selectedPost && <DetailsModal post={selectedPost} onClose={() => setSelectedPost(null)} />}

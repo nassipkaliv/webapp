@@ -67,13 +67,13 @@ function BottomNav({ activeTab, onTabChange, sponsorUnlocked, sponsorBadge }: Bo
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 mx-auto flex justify-center items-center gap-[clamp(30px,10vw,80px)] h-[clamp(70px,18vw,90px)] bg-[#130402] pb-[env(safe-area-inset-bottom,0px)] z-[100]">
+    <nav className="fixed bottom-0 inset-x-0 flex items-stretch h-[clamp(70px,18vw,90px)] bg-[#130402] pb-[env(safe-area-inset-bottom,0px)] z-[100]">
       {tabs.map(({ id, label, Icon, badge }) => {
         const isActive = activeTab === id;
         return (
           <button
             key={id}
-            className="flex flex-col items-center justify-center gap-1 transition-opacity duration-150 active:scale-95 relative px-5 py-7 -my-2"
+            className="flex-1 flex flex-col items-center justify-center gap-1 transition-opacity duration-150 active:scale-95 relative"
             style={{ color: isActive ? '#ffdb00' : 'rgba(255,255,255,0.7)' }}
             onClick={() => onTabChange(id)}
           >

@@ -16,14 +16,14 @@ function WithdrawPage({ balance, onTabChange, sponsorUnlocked, sponsorBadge }: W
 
   return (
     <div className="min-h-dvh flex flex-col relative bg-gradient-to-b from-black to-[#b42115]">
-      <main className="flex-1 flex flex-col items-center justify-center px-[clamp(12px,4vw,40px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1] gap-[clamp(8px,2vh,32px)] max-w-[480px] mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center justify-center px-[clamp(12px,4vw,40px)] pb-[calc(clamp(70px,18vw,90px)+env(safe-area-inset-bottom,0px))] relative z-[1] gap-[clamp(8px,2vh,32px)] max-w-[700px] mx-auto w-full">
         <h1 className="font-inter font-medium text-[clamp(28px,3.5vw,40px)] leading-[100%] text-center text-white">
           {t.withdraw.title}
         </h1>
         <img
           src={coinImage}
           alt={t.withdraw.euroCoinAlt}
-          className="w-[clamp(100px,25vh,260px)] h-auto select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+          className="w-[clamp(100px,25vh,340px)] h-auto select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
           draggable={false}
         />
 

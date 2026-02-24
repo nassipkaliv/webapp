@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import postsRouter from './routes/posts.js';
-import { initDb } from './db.js';
+import { initDb, getDb, getAllPosts } from './db.js';
 import { startBot } from './bot/index.js';
 import { initLikeBoost } from './likeBoost.js';
 
@@ -30,6 +30,20 @@ async function main() {
   // Health check
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok' });
+  });
+
+  // Debug endpoint — check DB instance identity
+  app.get('/api/debug/db', (_req, res) => {
+    const db = getDb();
+    const globalDb = (globalThis as Record<string, unknown>)['__webapp_sqljs_db__'];
+    const posts = getAllPosts();
+    res.json({
+      hasDb: !!db,
+      hasGlobalDb: !!globalDb,
+      sameInstance: db === globalDb,
+      postCount: posts.length,
+      posts: posts.map((p: { id: number; description: string }) => ({ id: p.id, desc: p.description?.substring(0, 50) })),
+    });
   });
 
   // Start like boost system

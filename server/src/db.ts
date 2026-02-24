@@ -137,6 +137,7 @@ export function createPost(post: {
   instagramLink?: string;
 }): PostRow | undefined {
   const db = getDbInstance();
+  console.log('[createPost] DB instance:', !!db, 'globalThis key exists:', !!(globalThis as Record<string, unknown>)[GLOBAL_KEY]);
   db.run(
     `INSERT INTO posts (title, description, image_url, details_text, telegram_link, whatsapp_link, instagram_link)
     VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -153,6 +154,7 @@ export function createPost(post: {
   saveDb();
 
   const allPosts = getAllPosts();
+  console.log('[createPost] After insert, total posts:', allPosts.length, 'DB_PATH:', DB_PATH);
   return allPosts[allPosts.length - 1];
 }
 

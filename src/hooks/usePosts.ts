@@ -83,5 +83,14 @@ export function usePosts() {
 
   useEffect(() => { loadInitial(); }, [loadInitial]);
 
+  // Refetch when app becomes visible (e.g. user switches back from Telegram)
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') loadInitial();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [loadInitial]);
+
   return { posts, loading, loadingMore, error, hasMore, loadMore, refetch: loadInitial };
 }

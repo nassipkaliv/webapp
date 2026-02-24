@@ -26,31 +26,29 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/** Convert UTF-16 string to array of Unicode code points for correct Telegram offset mapping */
-function toCodePoints(text: string): string[] {
-  return [...text];
-}
-
-/** Slice using Unicode code point offsets (Telegram's offset system) */
-function codePointSlice(text: string, start: number, end?: number): string {
-  const chars = toCodePoints(text);
-  return chars.slice(start, end).join('');
-}
-
-/** Convert Telegram message entities to HTML */
+/** Convert Telegram message entities to HTML.
+ *  Telegram Bot API offsets/lengths are in UTF-16 code units,
+ *  which matches JavaScript's native String indexing. */
 function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
-  if (!entities || entities.length === 0) return escapeHtml(text).replace(/\n/g, '<br>');
+  if (!entities || entities.length === 0) {
+    return escapeHtml(text).replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
+  }
 
+  // Filter out unsupported entity types that share offsets (e.g. custom_emoji)
+  // and sort by offset
   const sorted = [...entities].sort((a, b) => a.offset - b.offset);
   let result = '';
   let lastOffset = 0;
 
   for (const entity of sorted) {
+    // Skip overlapping entities (nested entities from Telegram)
+    if (entity.offset < lastOffset) continue;
+
     if (entity.offset > lastOffset) {
-      result += escapeHtml(codePointSlice(text, lastOffset, entity.offset));
+      result += escapeHtml(text.slice(lastOffset, entity.offset));
     }
 
-    const content = codePointSlice(text, entity.offset, entity.offset + entity.length);
+    const content = text.slice(entity.offset, entity.offset + entity.length);
     const escaped = escapeHtml(content);
 
     switch (entity.type) {
@@ -86,9 +84,8 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
     lastOffset = entity.offset + entity.length;
   }
 
-  const totalCodePoints = toCodePoints(text).length;
-  if (lastOffset < totalCodePoints) {
-    result += escapeHtml(codePointSlice(text, lastOffset));
+  if (lastOffset < text.length) {
+    result += escapeHtml(text.slice(lastOffset));
   }
 
   return result.replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');

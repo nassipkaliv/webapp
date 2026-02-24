@@ -38,8 +38,9 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
   const len = chars.length;
 
   // Build open/close tag events for each character position
-  const openTags: Map<number, string[]> = new Map();
-  const closeTags: Map<number, string[]> = new Map();
+  // Store entity length alongside tags so we can sort for proper nesting
+  const openTags: Map<number, { tag: string; length: number }[]> = new Map();
+  const closeTags: Map<number, { tag: string; length: number }[]> = new Map();
 
   for (const entity of entities) {
     const start = entity.offset;
@@ -68,20 +69,22 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
     }
 
     if (!openTags.has(start)) openTags.set(start, []);
-    openTags.get(start)!.push(openTag);
+    openTags.get(start)!.push({ tag: openTag, length: entity.length });
     if (!closeTags.has(end)) closeTags.set(end, []);
-    closeTags.get(end)!.unshift(closeTag);
+    closeTags.get(end)!.push({ tag: closeTag, length: entity.length });
   }
 
   let result = '';
   for (let i = 0; i <= len; i++) {
-    // Close tags first (in reverse nesting order)
+    // Close tags: shorter (inner) entities close first
     if (closeTags.has(i)) {
-      result += closeTags.get(i)!.join('');
+      const sorted = closeTags.get(i)!.sort((a, b) => a.length - b.length);
+      result += sorted.map(t => t.tag).join('');
     }
-    // Open tags
+    // Open tags: longer (outer) entities open first
     if (openTags.has(i)) {
-      result += openTags.get(i)!.join('');
+      const sorted = openTags.get(i)!.sort((a, b) => b.length - a.length);
+      result += sorted.map(t => t.tag).join('');
     }
     // Character
     if (i < len) {

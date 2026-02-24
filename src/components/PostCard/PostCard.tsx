@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react';
+import { useState, useCallback, forwardRef } from 'react';
 import type { Post } from '../../types/post';
 import { likePost, unlikePost, getImageUrl } from '../../api/posts';
 import t from '../../locales/ru.json';
@@ -14,6 +14,17 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ p
 
   const hasImage = post.imageUrl && post.imageUrl.length > 0;
   const hasLinks = post.telegramLink || post.whatsappLink || post.instagramLink;
+
+  // Handle clicks on <a> tags inside dangerouslySetInnerHTML content
+  const handleContentClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const anchor = target.closest('a');
+    if (anchor && anchor.href) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, []);
 
   const handleLike = async () => {
     const newLiked = !liked;
@@ -45,6 +56,7 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ p
 
       <div
         className="post-content font-inter text-[clamp(13px,1.4vw,16px)] text-white leading-[140%]"
+        onClick={handleContentClick}
         dangerouslySetInnerHTML={{ __html: post.description }}
       />
 

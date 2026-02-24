@@ -26,100 +26,67 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/**
- * Build a mapping from Unicode code-point index → UTF-16 index.
- * Telegram Bot API docs say offsets are UTF-16, but node-telegram-bot-api
- * and some Telegram clients actually send code-point offsets.
- * We detect which one is in use and convert accordingly.
- */
-function cpToUtf16(text: string): number[] {
-  const map: number[] = [];
-  let utf16 = 0;
-  for (const ch of text) {
-    map.push(utf16);
-    utf16 += ch.length; // 1 for BMP, 2 for surrogate pair
-  }
-  map.push(utf16); // sentinel for end
-  return map;
-}
-
-/** Convert Telegram message entities to HTML. */
+/** Convert Telegram message entities to HTML.
+ *  Supports nested/overlapping entities (e.g. bold wrapping a text_link). */
 function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
   if (!entities || entities.length === 0) {
     return escapeHtml(text).replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
   }
 
-  // Detect if offsets are code-point based or UTF-16 based.
-  // If text has surrogate pairs and the last entity ends beyond text.length
-  // in code-point math but within [...text].length, offsets are code-point based.
-  const codePoints = [...text];
-  const cpLen = codePoints.length;
-  const utf16Len = text.length;
-  const hasMultiByteChars = cpLen !== utf16Len;
+  // Use code-point array for indexing (Telegram sends code-point offsets)
+  const chars = [...text];
+  const len = chars.length;
 
-  // If there are no multi-byte chars, both systems are identical
-  let sliceFn: (start: number, end?: number) => string;
-  let textLen: number;
+  // Build open/close tag events for each character position
+  const openTags: Map<number, string[]> = new Map();
+  const closeTags: Map<number, string[]> = new Map();
 
-  if (hasMultiByteChars) {
-    // Use code-point based slicing (entities use code-point offsets)
-    sliceFn = (start: number, end?: number) => codePoints.slice(start, end).join('');
-    textLen = cpLen;
-  } else {
-    // No surrogate pairs — both systems are identical
-    sliceFn = (start: number, end?: number) => text.slice(start, end);
-    textLen = utf16Len;
-  }
-
-  const sorted = [...entities].sort((a, b) => a.offset - b.offset);
-  let result = '';
-  let lastOffset = 0;
-
-  for (const entity of sorted) {
-    if (entity.offset < lastOffset) continue;
-
-    if (entity.offset > lastOffset) {
-      result += escapeHtml(sliceFn(lastOffset, entity.offset));
-    }
-
-    const content = sliceFn(entity.offset, entity.offset + entity.length);
-    const escaped = escapeHtml(content);
+  for (const entity of entities) {
+    const start = entity.offset;
+    const end = entity.offset + entity.length;
+    let openTag = '';
+    let closeTag = '';
 
     switch (entity.type) {
-      case 'bold':
-        result += `<b>${escaped}</b>`;
-        break;
-      case 'italic':
-        result += `<i>${escaped}</i>`;
-        break;
-      case 'underline':
-        result += `<u>${escaped}</u>`;
-        break;
-      case 'strikethrough':
-        result += `<s>${escaped}</s>`;
-        break;
-      case 'code':
-        result += `<code>${escaped}</code>`;
-        break;
-      case 'pre':
-        result += `<pre>${escaped}</pre>`;
-        break;
+      case 'bold': openTag = '<b>'; closeTag = '</b>'; break;
+      case 'italic': openTag = '<i>'; closeTag = '</i>'; break;
+      case 'underline': openTag = '<u>'; closeTag = '</u>'; break;
+      case 'strikethrough': openTag = '<s>'; closeTag = '</s>'; break;
+      case 'code': openTag = '<code>'; closeTag = '</code>'; break;
+      case 'pre': openTag = '<pre>'; closeTag = '</pre>'; break;
       case 'text_link':
-        result += `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">${escaped}</a>`;
+        openTag = `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">`;
+        closeTag = '</a>';
         break;
-      case 'url':
-        result += `<a href="${content}" target="_blank" rel="noopener noreferrer">${escaped}</a>`;
+      case 'url': {
+        const url = chars.slice(start, end).join('');
+        openTag = `<a href="${url}" target="_blank" rel="noopener noreferrer">`;
+        closeTag = '</a>';
         break;
-      default:
-        result += escaped;
-        break;
+      }
+      default: continue;
     }
 
-    lastOffset = entity.offset + entity.length;
+    if (!openTags.has(start)) openTags.set(start, []);
+    openTags.get(start)!.push(openTag);
+    if (!closeTags.has(end)) closeTags.set(end, []);
+    closeTags.get(end)!.unshift(closeTag);
   }
 
-  if (lastOffset < textLen) {
-    result += escapeHtml(sliceFn(lastOffset));
+  let result = '';
+  for (let i = 0; i <= len; i++) {
+    // Close tags first (in reverse nesting order)
+    if (closeTags.has(i)) {
+      result += closeTags.get(i)!.join('');
+    }
+    // Open tags
+    if (openTags.has(i)) {
+      result += openTags.get(i)!.join('');
+    }
+    // Character
+    if (i < len) {
+      result += escapeHtml(chars[i]!);
+    }
   }
 
   return result.replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');

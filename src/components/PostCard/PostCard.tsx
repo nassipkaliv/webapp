@@ -92,7 +92,7 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ p
       )}
 
       <button
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-200 active:scale-95"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-200 active:scale-95 outline-none border-none bg-transparent"
         onClick={handleLike}
       >
         <svg width="20" height="19" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">

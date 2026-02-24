@@ -27,92 +27,74 @@ function escapeHtml(text: string): string {
 }
 
 /** Convert Telegram message entities to HTML.
- *  Supports nested/overlapping entities (e.g. bold wrapping a text_link). */
+ *  Supports nested/overlapping entities by tracking active tags per character. */
 function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
   if (!entities || entities.length === 0) {
     return escapeHtml(text).replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
   }
 
-  // Use code-point array for indexing (Telegram sends code-point offsets)
   const chars = [...text];
   const len = chars.length;
 
-  // Collect entity info with computed tags
-  const entityInfos: { start: number; end: number; openTag: string; closeTag: string; isLink: boolean }[] = [];
+  // Parse entities into a stable list with open/close tags
+  interface EInfo { start: number; end: number; openTag: string; closeTag: string }
+  const ents: EInfo[] = [];
 
   for (const entity of entities) {
     const start = entity.offset;
     const end = entity.offset + entity.length;
-    let openTag = '';
-    let closeTag = '';
-    let isLink = false;
 
     switch (entity.type) {
-      case 'bold': openTag = '<b>'; closeTag = '</b>'; break;
-      case 'italic': openTag = '<i>'; closeTag = '</i>'; break;
-      case 'underline': openTag = '<u>'; closeTag = '</u>'; break;
-      case 'strikethrough': openTag = '<s>'; closeTag = '</s>'; break;
-      case 'code': openTag = '<code>'; closeTag = '</code>'; break;
-      case 'pre': openTag = '<pre>'; closeTag = '</pre>'; break;
+      case 'bold': ents.push({ start, end, openTag: '<b>', closeTag: '</b>' }); break;
+      case 'italic': ents.push({ start, end, openTag: '<i>', closeTag: '</i>' }); break;
+      case 'underline': ents.push({ start, end, openTag: '<u>', closeTag: '</u>' }); break;
+      case 'strikethrough': ents.push({ start, end, openTag: '<s>', closeTag: '</s>' }); break;
+      case 'code': ents.push({ start, end, openTag: '<code>', closeTag: '</code>' }); break;
+      case 'pre': ents.push({ start, end, openTag: '<pre>', closeTag: '</pre>' }); break;
       case 'text_link':
-        openTag = `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">`;
-        closeTag = '</a>';
-        isLink = true;
+        ents.push({ start, end, openTag: `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">`, closeTag: '</a>' });
         break;
       case 'url': {
         const url = chars.slice(start, end).join('');
-        openTag = `<a href="${url}" target="_blank" rel="noopener noreferrer">`;
-        closeTag = '</a>';
-        isLink = true;
+        ents.push({ start, end, openTag: `<a href="${url}" target="_blank" rel="noopener noreferrer">`, closeTag: '</a>' });
         break;
       }
-      default: continue;
     }
-
-    entityInfos.push({ start, end, openTag, closeTag, isLink });
   }
 
-  // Build open/close tag events for each character position
-  const openTags: Map<number, typeof entityInfos> = new Map();
-  const closeTags: Map<number, typeof entityInfos> = new Map();
-
-  for (const info of entityInfos) {
-    if (!openTags.has(info.start)) openTags.set(info.start, []);
-    openTags.get(info.start)!.push(info);
-    if (!closeTags.has(info.end)) closeTags.set(info.end, []);
-    closeTags.get(info.end)!.push(info);
-  }
-
+  // For each character position, compute which entities are active.
+  // When the set of active entities changes, close old tags and open new ones.
   let result = '';
-  for (let i = 0; i <= len; i++) {
-    // Close tags: inner entities close first
-    // Sort by: 1) shorter span first, 2) links close before formatting (links are innermost)
-    if (closeTags.has(i)) {
-      const sorted = closeTags.get(i)!.sort((a, b) => {
-        const spanDiff = (a.end - a.start) - (b.end - b.start);
-        if (spanDiff !== 0) return spanDiff;
-        // Same span length: links close first (they're innermost)
-        if (a.isLink !== b.isLink) return a.isLink ? -1 : 1;
-        return 0;
-      });
-      result += sorted.map(e => e.closeTag).join('');
+  let activeEnts: EInfo[] = []; // currently open entities, in nesting order
+
+  for (let i = 0; i < len; i++) {
+    // Which entities cover position i?
+    const wanted = ents.filter(e => e.start <= i && i < e.end);
+    // Sort: longer span (outer) first, then by start position (earlier = outer)
+    wanted.sort((a, b) => (b.end - b.start) - (a.end - a.start) || a.start - b.start);
+
+    // Check if active set changed
+    const activeKeys = activeEnts.map(e => e.openTag).join('|');
+    const wantedKeys = wanted.map(e => e.openTag).join('|');
+
+    if (activeKeys !== wantedKeys) {
+      // Close all currently active tags (reverse order)
+      for (let j = activeEnts.length - 1; j >= 0; j--) {
+        result += activeEnts[j]!.closeTag;
+      }
+      // Open all wanted tags
+      for (const e of wanted) {
+        result += e.openTag;
+      }
+      activeEnts = wanted;
     }
-    // Open tags: outer entities open first
-    // Sort by: 1) longer span first, 2) links open after formatting (links are innermost)
-    if (openTags.has(i)) {
-      const sorted = openTags.get(i)!.sort((a, b) => {
-        const spanDiff = (b.end - b.start) - (a.end - a.start);
-        if (spanDiff !== 0) return spanDiff;
-        // Same span length: links open last (they're innermost)
-        if (a.isLink !== b.isLink) return a.isLink ? 1 : -1;
-        return 0;
-      });
-      result += sorted.map(e => e.openTag).join('');
-    }
-    // Character
-    if (i < len) {
-      result += escapeHtml(chars[i]!);
-    }
+
+    result += escapeHtml(chars[i]!);
+  }
+
+  // Close remaining
+  for (let j = activeEnts.length - 1; j >= 0; j--) {
+    result += activeEnts[j]!.closeTag;
   }
 
   return result.replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');

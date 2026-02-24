@@ -37,16 +37,15 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
   const chars = [...text];
   const len = chars.length;
 
-  // Build open/close tag events for each character position
-  // Store entity length alongside tags so we can sort for proper nesting
-  const openTags: Map<number, { tag: string; length: number }[]> = new Map();
-  const closeTags: Map<number, { tag: string; length: number }[]> = new Map();
+  // Collect entity info with computed tags
+  const entityInfos: { start: number; end: number; openTag: string; closeTag: string; isLink: boolean }[] = [];
 
   for (const entity of entities) {
     const start = entity.offset;
     const end = entity.offset + entity.length;
     let openTag = '';
     let closeTag = '';
+    let isLink = false;
 
     switch (entity.type) {
       case 'bold': openTag = '<b>'; closeTag = '</b>'; break;
@@ -58,33 +57,57 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
       case 'text_link':
         openTag = `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">`;
         closeTag = '</a>';
+        isLink = true;
         break;
       case 'url': {
         const url = chars.slice(start, end).join('');
         openTag = `<a href="${url}" target="_blank" rel="noopener noreferrer">`;
         closeTag = '</a>';
+        isLink = true;
         break;
       }
       default: continue;
     }
 
-    if (!openTags.has(start)) openTags.set(start, []);
-    openTags.get(start)!.push({ tag: openTag, length: entity.length });
-    if (!closeTags.has(end)) closeTags.set(end, []);
-    closeTags.get(end)!.push({ tag: closeTag, length: entity.length });
+    entityInfos.push({ start, end, openTag, closeTag, isLink });
+  }
+
+  // Build open/close tag events for each character position
+  const openTags: Map<number, typeof entityInfos> = new Map();
+  const closeTags: Map<number, typeof entityInfos> = new Map();
+
+  for (const info of entityInfos) {
+    if (!openTags.has(info.start)) openTags.set(info.start, []);
+    openTags.get(info.start)!.push(info);
+    if (!closeTags.has(info.end)) closeTags.set(info.end, []);
+    closeTags.get(info.end)!.push(info);
   }
 
   let result = '';
   for (let i = 0; i <= len; i++) {
-    // Close tags: shorter (inner) entities close first
+    // Close tags: inner entities close first
+    // Sort by: 1) shorter span first, 2) links close before formatting (links are innermost)
     if (closeTags.has(i)) {
-      const sorted = closeTags.get(i)!.sort((a, b) => a.length - b.length);
-      result += sorted.map(t => t.tag).join('');
+      const sorted = closeTags.get(i)!.sort((a, b) => {
+        const spanDiff = (a.end - a.start) - (b.end - b.start);
+        if (spanDiff !== 0) return spanDiff;
+        // Same span length: links close first (they're innermost)
+        if (a.isLink !== b.isLink) return a.isLink ? -1 : 1;
+        return 0;
+      });
+      result += sorted.map(e => e.closeTag).join('');
     }
-    // Open tags: longer (outer) entities open first
+    // Open tags: outer entities open first
+    // Sort by: 1) longer span first, 2) links open after formatting (links are innermost)
     if (openTags.has(i)) {
-      const sorted = openTags.get(i)!.sort((a, b) => b.length - a.length);
-      result += sorted.map(t => t.tag).join('');
+      const sorted = openTags.get(i)!.sort((a, b) => {
+        const spanDiff = (b.end - b.start) - (a.end - a.start);
+        if (spanDiff !== 0) return spanDiff;
+        // Same span length: links open last (they're innermost)
+        if (a.isLink !== b.isLink) return a.isLink ? 1 : -1;
+        return 0;
+      });
+      result += sorted.map(e => e.openTag).join('');
     }
     // Character
     if (i < len) {

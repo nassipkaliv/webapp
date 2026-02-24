@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Post } from '../types/post';
-import { fetchPostsPaginated } from '../api/posts';
+import { fetchLastPosts, fetchPostsPaginated, getCachedPosts } from '../api/posts';
 
 const PAGE_SIZE = 10;
 
@@ -18,20 +18,33 @@ export function usePosts() {
   const loadInitial = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    // Show cached posts instantly while fetching fresh data
+    const cached = getCachedPosts();
+    if (cached && cached.posts.length > 0) {
+      setPosts(cached.posts);
+      oldestOffsetRef.current = cached.startOffset;
+      const more = cached.startOffset > 0;
+      setHasMore(more);
+      hasMoreRef.current = more;
+      setLoading(false);
+    }
+
     try {
-      // First fetch to get total count, then load the last PAGE_SIZE posts
-      const { total } = await fetchPostsPaginated(1, 0);
-      const startOffset = Math.max(0, total - PAGE_SIZE);
-      const { posts: data } = await fetchPostsPaginated(PAGE_SIZE, startOffset);
+      // Single request — no double round-trip
+      const { posts: data, startOffset } = await fetchLastPosts(PAGE_SIZE);
       setPosts(data);
       oldestOffsetRef.current = startOffset;
       const more = startOffset > 0;
       setHasMore(more);
       hasMoreRef.current = more;
     } catch {
-      setPosts([]);
-      setHasMore(false);
-      hasMoreRef.current = false;
+      // If we have cached data, keep showing it
+      if (!cached || cached.posts.length === 0) {
+        setPosts([]);
+        setHasMore(false);
+        hasMoreRef.current = false;
+      }
     } finally {
       setLoading(false);
     }

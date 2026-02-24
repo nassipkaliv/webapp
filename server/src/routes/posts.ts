@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
-  getAllPosts, getPostsPaginated, getPostById, createPost, updatePost, deletePost,
+  getAllPosts, getPostsPaginated, getLastPosts, getPostById, createPost, updatePost, deletePost,
   incrementLike, decrementLike, type PostRow,
 } from '../db.js';
 
@@ -46,6 +46,13 @@ function transformPost(row: PostRow) {
     updatedAt: row.updated_at,
   };
 }
+
+// GET /api/posts/last?count=10  — single request to get last N posts + total
+router.get('/last', (req: Request, res: Response) => {
+  const count = Math.min(Math.max(parseInt(req.query.count as string) || 10, 1), 50);
+  const { posts, total, startOffset } = getLastPosts(count);
+  res.json({ success: true, data: posts.map(transformPost), total, startOffset });
+});
 
 // GET /api/posts?limit=10&offset=0
 router.get('/', (req: Request, res: Response) => {

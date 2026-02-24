@@ -92,7 +92,7 @@ function App() {
 
   return (
     <div className="mx-auto min-h-dvh relative overflow-hidden">
-      {activeTab === 'home' && (
+      <div className={activeTab !== 'home' ? 'hidden' : ''}>
         <HomePage
           balance={balance}
           setBalance={setBalance}
@@ -104,15 +104,15 @@ function App() {
           onUnlockSponsor={handleUnlockSponsor}
           sponsorBadge={unread}
         />
-      )}
-      {activeTab === 'withdraw' && (
+      </div>
+      <div className={activeTab !== 'withdraw' ? 'hidden' : ''}>
         <WithdrawPage
           balance={balance}
           onTabChange={handleTabChange}
           sponsorUnlocked={sponsorUnlocked}
           sponsorBadge={unread}
         />
-      )}
+      </div>
       {activeTab === 'sponsor' && (
         <SponsorPage
           onTabChange={handleTabChange}

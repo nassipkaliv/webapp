@@ -6,20 +6,21 @@ export function startBot(app: Express) {
   const token = process.env.TELEGRAM_BOT_TOKEN!;
   const appUrl = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || '';
 
-  // Use webhook mode — no polling, no 409 conflicts
-  const bot = new TelegramBot(token, { polling: false });
+  // If we have an HTTPS app URL, use webhook mode; otherwise use polling
+  const useWebhook = appUrl.startsWith('https://');
+
+  const bot = new TelegramBot(token, { polling: !useWebhook });
 
   registerHandlers(bot);
 
-  // Set up webhook endpoint on Express
-  const webhookPath = `/bot${token}`;
-  app.post(webhookPath, (req, res) => {
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-  });
+  if (useWebhook) {
+    // Set up webhook endpoint on Express
+    const webhookPath = `/bot${token}`;
+    app.post(webhookPath, (req, res) => {
+      bot.processUpdate(req.body);
+      res.sendStatus(200);
+    });
 
-  // Register webhook with Telegram
-  if (appUrl) {
     const webhookUrl = `${appUrl}${webhookPath}`;
     bot.setWebHook(webhookUrl).then(() => {
       console.log(`Telegram bot webhook set: ${webhookUrl}`);
@@ -27,6 +28,11 @@ export function startBot(app: Express) {
       console.error('Failed to set webhook:', err.message);
     });
   } else {
-    console.warn('APP_URL not set, bot webhook not registered. Set RENDER_EXTERNAL_URL or APP_URL.');
+    // Delete any existing webhook so polling works
+    bot.deleteWebHook().then(() => {
+      console.log('Telegram bot started in polling mode');
+    }).catch(() => {
+      console.log('Telegram bot started in polling mode');
+    });
   }
 }

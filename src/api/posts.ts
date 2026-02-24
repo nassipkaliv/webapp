@@ -1,6 +1,6 @@
 import type { Post, ApiResponse } from '../types/post';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://webapp-omhl.onrender.com';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://api.mirsinisme.com';
 
 const CACHE_KEY = 'posts_cache';
 const CACHE_TTL = 60_000; // 1 minute

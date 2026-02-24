@@ -91,7 +91,7 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
     result += escapeHtml(codePointSlice(text, lastOffset));
   }
 
-  return result.replace(/\n/g, '<br>');
+  return result.replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
 }
 
 function stripHtml(html: string): string {

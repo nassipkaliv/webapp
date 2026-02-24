@@ -26,29 +26,63 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
-/** Convert Telegram message entities to HTML.
- *  Telegram Bot API offsets/lengths are in UTF-16 code units,
- *  which matches JavaScript's native String indexing. */
+/**
+ * Build a mapping from Unicode code-point index → UTF-16 index.
+ * Telegram Bot API docs say offsets are UTF-16, but node-telegram-bot-api
+ * and some Telegram clients actually send code-point offsets.
+ * We detect which one is in use and convert accordingly.
+ */
+function cpToUtf16(text: string): number[] {
+  const map: number[] = [];
+  let utf16 = 0;
+  for (const ch of text) {
+    map.push(utf16);
+    utf16 += ch.length; // 1 for BMP, 2 for surrogate pair
+  }
+  map.push(utf16); // sentinel for end
+  return map;
+}
+
+/** Convert Telegram message entities to HTML. */
 function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
   if (!entities || entities.length === 0) {
     return escapeHtml(text).replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
   }
 
-  // Filter out unsupported entity types that share offsets (e.g. custom_emoji)
-  // and sort by offset
+  // Detect if offsets are code-point based or UTF-16 based.
+  // If text has surrogate pairs and the last entity ends beyond text.length
+  // in code-point math but within [...text].length, offsets are code-point based.
+  const codePoints = [...text];
+  const cpLen = codePoints.length;
+  const utf16Len = text.length;
+  const hasMultiByteChars = cpLen !== utf16Len;
+
+  // If there are no multi-byte chars, both systems are identical
+  let sliceFn: (start: number, end?: number) => string;
+  let textLen: number;
+
+  if (hasMultiByteChars) {
+    // Use code-point based slicing (entities use code-point offsets)
+    sliceFn = (start: number, end?: number) => codePoints.slice(start, end).join('');
+    textLen = cpLen;
+  } else {
+    // No surrogate pairs — both systems are identical
+    sliceFn = (start: number, end?: number) => text.slice(start, end);
+    textLen = utf16Len;
+  }
+
   const sorted = [...entities].sort((a, b) => a.offset - b.offset);
   let result = '';
   let lastOffset = 0;
 
   for (const entity of sorted) {
-    // Skip overlapping entities (nested entities from Telegram)
     if (entity.offset < lastOffset) continue;
 
     if (entity.offset > lastOffset) {
-      result += escapeHtml(text.slice(lastOffset, entity.offset));
+      result += escapeHtml(sliceFn(lastOffset, entity.offset));
     }
 
-    const content = text.slice(entity.offset, entity.offset + entity.length);
+    const content = sliceFn(entity.offset, entity.offset + entity.length);
     const escaped = escapeHtml(content);
 
     switch (entity.type) {
@@ -84,8 +118,8 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
     lastOffset = entity.offset + entity.length;
   }
 
-  if (lastOffset < text.length) {
-    result += escapeHtml(text.slice(lastOffset));
+  if (lastOffset < textLen) {
+    result += escapeHtml(sliceFn(lastOffset));
   }
 
   return result.replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
@@ -188,13 +222,7 @@ export function registerHandlers(bot: TelegramBot) {
 
     switch (session.step) {
       case 'awaiting_text': {
-        // Debug: log raw text and entities to understand offset encoding
-        console.log('[DEBUG] text:', JSON.stringify(msg.text));
-        console.log('[DEBUG] text.length (UTF-16):', msg.text.length);
-        console.log('[DEBUG] [...text].length (code points):', [...msg.text].length);
-        console.log('[DEBUG] entities:', JSON.stringify(msg.entities));
         session.postDraft.text = messageToHtml(msg.text, msg.entities);
-        console.log('[DEBUG] result HTML:', session.postDraft.text);
         session.step = 'awaiting_image';
         bot.sendMessage(msg.chat.id,
           '📷 Send a PHOTO, or type "skip" to publish without image:'

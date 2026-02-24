@@ -6,7 +6,16 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_PATH = path.join(__dirname, '..', 'data', 'posts.db');
 
-let db: SqlJsDatabase;
+// Use globalThis to guarantee a single DB instance even if tsx duplicates modules
+const GLOBAL_KEY = '__webapp_sqljs_db__';
+
+function getDbInstance(): SqlJsDatabase {
+  return (globalThis as Record<string, unknown>)[GLOBAL_KEY] as SqlJsDatabase;
+}
+
+function setDbInstance(instance: SqlJsDatabase) {
+  (globalThis as Record<string, unknown>)[GLOBAL_KEY] = instance;
+}
 
 export async function initDb() {
   const SQL = await initSqlJs();
@@ -14,6 +23,7 @@ export async function initDb() {
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
+  let db: SqlJsDatabase;
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);
     db = new SQL.Database(buffer);
@@ -39,18 +49,20 @@ export async function initDb() {
     )
   `);
 
+  setDbInstance(db);
   saveDb();
   return db;
 }
 
 export function saveDb() {
+  const db = getDbInstance();
   const data = db.export();
   const buffer = Buffer.from(data);
   fs.writeFileSync(DB_PATH, buffer);
 }
 
 export function getDb() {
-  return db;
+  return getDbInstance();
 }
 
 
@@ -81,11 +93,13 @@ function rowsToObjects(result: initSqlJs.QueryExecResult[]): PostRow[] {
 }
 
 export function getAllPosts(): PostRow[] {
+  const db = getDbInstance();
   const result = db.exec('SELECT * FROM posts ORDER BY created_at ASC');
   return rowsToObjects(result);
 }
 
 export function getPostsPaginated(limit: number, offset: number): { posts: PostRow[]; total: number } {
+  const db = getDbInstance();
   const countResult = db.exec('SELECT COUNT(*) as cnt FROM posts');
   const total = countResult.length ? (countResult[0]!.values[0]![0] as number) : 0;
   const result = db.exec(`SELECT * FROM posts ORDER BY created_at ASC LIMIT ${limit} OFFSET ${offset}`);
@@ -93,6 +107,7 @@ export function getPostsPaginated(limit: number, offset: number): { posts: PostR
 }
 
 export function getLastPosts(count: number): { posts: PostRow[]; total: number; startOffset: number } {
+  const db = getDbInstance();
   const countResult = db.exec('SELECT COUNT(*) as cnt FROM posts');
   const total = countResult.length ? (countResult[0]!.values[0]![0] as number) : 0;
   const startOffset = Math.max(0, total - count);
@@ -101,6 +116,7 @@ export function getLastPosts(count: number): { posts: PostRow[]; total: number; 
 }
 
 export function getPostById(id: number): PostRow | undefined {
+  const db = getDbInstance();
   const stmt = db.prepare('SELECT * FROM posts WHERE id = ?');
   stmt.bind([id]);
   if (!stmt.step()) {
@@ -120,6 +136,7 @@ export function createPost(post: {
   whatsappLink?: string;
   instagramLink?: string;
 }): PostRow | undefined {
+  const db = getDbInstance();
   db.run(
     `INSERT INTO posts (title, description, image_url, details_text, telegram_link, whatsapp_link, instagram_link)
     VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -147,6 +164,7 @@ export function updatePost(id: number, fields: Partial<{
   whatsappLink: string;
   instagramLink: string;
 }>): PostRow | undefined {
+  const db = getDbInstance();
   const columnMap: Record<string, string> = {
     description: 'description',
     imageUrl: 'image_url',
@@ -178,17 +196,20 @@ export function updatePost(id: number, fields: Partial<{
 }
 
 export function deletePost(id: number) {
+  const db = getDbInstance();
   db.run('DELETE FROM posts WHERE id = ?', [id]);
   saveDb();
 }
 
 export function incrementLike(id: number): PostRow | undefined {
+  const db = getDbInstance();
   db.run('UPDATE posts SET like_count = like_count + 1 WHERE id = ?', [id]);
   saveDb();
   return getPostById(id);
 }
 
 export function decrementLike(id: number): PostRow | undefined {
+  const db = getDbInstance();
   db.run('UPDATE posts SET like_count = CASE WHEN like_count > 0 THEN like_count - 1 ELSE 0 END WHERE id = ?', [id]);
   saveDb();
   return getPostById(id);

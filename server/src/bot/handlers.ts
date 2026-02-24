@@ -26,6 +26,17 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
+/** Convert UTF-16 string to array of Unicode code points for correct Telegram offset mapping */
+function toCodePoints(text: string): string[] {
+  return [...text];
+}
+
+/** Slice using Unicode code point offsets (Telegram's offset system) */
+function codePointSlice(text: string, start: number, end?: number): string {
+  const chars = toCodePoints(text);
+  return chars.slice(start, end).join('');
+}
+
 /** Convert Telegram message entities to HTML */
 function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
   if (!entities || entities.length === 0) return escapeHtml(text).replace(/\n/g, '<br>');
@@ -36,10 +47,10 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
 
   for (const entity of sorted) {
     if (entity.offset > lastOffset) {
-      result += escapeHtml(text.slice(lastOffset, entity.offset));
+      result += escapeHtml(codePointSlice(text, lastOffset, entity.offset));
     }
 
-    const content = text.slice(entity.offset, entity.offset + entity.length);
+    const content = codePointSlice(text, entity.offset, entity.offset + entity.length);
     const escaped = escapeHtml(content);
 
     switch (entity.type) {
@@ -75,8 +86,9 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
     lastOffset = entity.offset + entity.length;
   }
 
-  if (lastOffset < text.length) {
-    result += escapeHtml(text.slice(lastOffset));
+  const totalCodePoints = toCodePoints(text).length;
+  if (lastOffset < totalCodePoints) {
+    result += escapeHtml(codePointSlice(text, lastOffset));
   }
 
   return result.replace(/\n/g, '<br>');

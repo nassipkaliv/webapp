@@ -188,7 +188,13 @@ export function registerHandlers(bot: TelegramBot) {
 
     switch (session.step) {
       case 'awaiting_text': {
+        // Debug: log raw text and entities to understand offset encoding
+        console.log('[DEBUG] text:', JSON.stringify(msg.text));
+        console.log('[DEBUG] text.length (UTF-16):', msg.text.length);
+        console.log('[DEBUG] [...text].length (code points):', [...msg.text].length);
+        console.log('[DEBUG] entities:', JSON.stringify(msg.entities));
         session.postDraft.text = messageToHtml(msg.text, msg.entities);
+        console.log('[DEBUG] result HTML:', session.postDraft.text);
         session.step = 'awaiting_image';
         bot.sendMessage(msg.chat.id,
           '📷 Send a PHOTO, or type "skip" to publish without image:'

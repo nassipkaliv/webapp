@@ -27,14 +27,14 @@ function escapeHtml(text: string): string {
 }
 
 /** Convert Telegram message entities to HTML.
- *  Supports nested/overlapping entities by tracking active tags per character. */
+ *  Telegram offsets are in UTF-16 code units, so we iterate by UTF-16 index. */
 function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): string {
   if (!entities || entities.length === 0) {
     return escapeHtml(text).replace(/\n/g, '<br>').replace(/^(<br>)+/, '').replace(/(<br>)+$/, '');
   }
 
-  const chars = [...text];
-  const len = chars.length;
+  // text.length is UTF-16 code units — matches Telegram offsets
+  const len = text.length;
 
   // Parse entities into a stable list with open/close tags
   interface EInfo { start: number; end: number; openTag: string; closeTag: string }
@@ -55,29 +55,36 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
         ents.push({ start, end, openTag: `<a href="${entity.url}" target="_blank" rel="noopener noreferrer">`, closeTag: '</a>' });
         break;
       case 'url': {
-        const url = chars.slice(start, end).join('');
+        const url = text.slice(start, end);
         ents.push({ start, end, openTag: `<a href="${url}" target="_blank" rel="noopener noreferrer">`, closeTag: '</a>' });
         break;
       }
     }
   }
 
-  // For each character position, compute which entities are active.
+  // For each UTF-16 position, compute which entities are active.
   // When the set of active entities changes, close old tags and open new ones.
   let result = '';
-  let activeEnts: EInfo[] = []; // currently open entities, in nesting order
+  let activeEnts: EInfo[] = [];
 
-  for (let i = 0; i < len; i++) {
+  let i = 0;
+  while (i < len) {
+    // Handle surrogate pairs (emoji) — advance by 2 UTF-16 code units
+    const code = text.charCodeAt(i);
+    const isSurrogatePair = code >= 0xD800 && code <= 0xDBFF && (i + 1) < len;
+    const char = isSurrogatePair ? text.slice(i, i + 2) : text[i]!;
+    const step = isSurrogatePair ? 2 : 1;
+
     // Which entities cover position i?
     const wanted = ents.filter(e => e.start <= i && i < e.end);
     // Sort: longer span (outer) first, then by start position (earlier = outer)
     wanted.sort((a, b) => (b.end - b.start) - (a.end - a.start) || a.start - b.start);
 
     // Check if active set changed
-    const activeKeys = activeEnts.map(e => e.openTag).join('|');
-    const wantedKeys = wanted.map(e => e.openTag).join('|');
+    const changed = activeEnts.length !== wanted.length ||
+      activeEnts.some((e, idx) => e !== wanted[idx]);
 
-    if (activeKeys !== wantedKeys) {
+    if (changed) {
       // Close all currently active tags (reverse order)
       for (let j = activeEnts.length - 1; j >= 0; j--) {
         result += activeEnts[j]!.closeTag;
@@ -89,7 +96,8 @@ function messageToHtml(text: string, entities?: TelegramBot.MessageEntity[]): st
       activeEnts = wanted;
     }
 
-    result += escapeHtml(chars[i]!);
+    result += escapeHtml(char);
+    i += step;
   }
 
   // Close remaining

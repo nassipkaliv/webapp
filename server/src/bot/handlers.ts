@@ -197,6 +197,9 @@ export function registerHandlers(bot: TelegramBot) {
 
     switch (session.step) {
       case 'awaiting_text': {
+        console.log('[DEBUG entities]', JSON.stringify(msg.entities));
+        console.log('[DEBUG text]', JSON.stringify(msg.text));
+        console.log('[DEBUG html]', messageToHtml(msg.text, msg.entities));
         session.postDraft.text = messageToHtml(msg.text, msg.entities);
         session.step = 'awaiting_image';
         bot.sendMessage(msg.chat.id,

@@ -6,7 +6,7 @@ interface CoinHeroProps {
 
 function CoinHero({ onTap }: CoinHeroProps) {
   return (
-    <div className="relative py-[clamp(8px,2vh,24px)] flex items-center justify-center w-full">
+    <div className="coin-hero relative py-[clamp(8px,2vh,24px)] flex items-center justify-center w-full">
       <img
         src={coinImage}
         alt="Euro coin"

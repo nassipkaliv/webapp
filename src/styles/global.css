@@ -37,7 +37,7 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Landscape / short viewport adjustments for modals */
+/* Landscape / short viewport adjustments */
 @media (orientation: landscape) and (max-height: 500px) {
   .modal-avatar {
     width: 60px !important;
@@ -47,6 +47,17 @@ button {
   .modal-inner {
     padding: 10px 12px !important;
     gap: 6px !important;
+  }
+  .home-main {
+    gap: 8px !important;
+    padding-top: 4px !important;
+    padding-bottom: 60px !important;
+  }
+  .coin-hero img {
+    width: min(100px, 28vh) !important;
+  }
+  .balance-header span {
+    font-size: 22px !important;
   }
 }
 

@@ -5,7 +5,7 @@ interface BalanceHeaderProps {
 
 function BalanceHeader({ amount, currency }: BalanceHeaderProps) {
   return (
-    <div className="text-center select-none">
+    <div className="balance-header text-center select-none">
       <span className="font-inter font-bold text-[clamp(28px,4vw,40px)] leading-none text-white">
         {amount} {currency}
       </span>

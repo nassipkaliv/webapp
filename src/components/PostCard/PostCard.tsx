@@ -8,8 +8,19 @@ interface PostCardProps {
   onDetailsClick?: (post: Post) => void;
 }
 
+function getLikedIds(): Set<number> {
+  try {
+    const raw = localStorage.getItem('liked_posts');
+    return raw ? new Set(JSON.parse(raw) as number[]) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveLikedIds(ids: Set<number>) {
+  localStorage.setItem('liked_posts', JSON.stringify([...ids]));
+}
+
 const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ post, onDetailsClick }, ref) {
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(() => getLikedIds().has(post.id));
   const [likeCount, setLikeCount] = useState(post.likeCount);
 
   const hasImage = post.imageUrl && post.imageUrl.length > 0;
@@ -30,6 +41,11 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ p
     const newLiked = !liked;
     setLiked(newLiked);
     setLikeCount(prev => newLiked ? prev + 1 : prev - 1);
+
+    const ids = getLikedIds();
+    if (newLiked) { ids.add(post.id); } else { ids.delete(post.id); }
+    saveLikedIds(ids);
+
     try {
       if (newLiked) {
         await likePost(post.id);
@@ -39,6 +55,9 @@ const PostCard = forwardRef<HTMLDivElement, PostCardProps>(function PostCard({ p
     } catch {
       setLiked(!newLiked);
       setLikeCount(prev => newLiked ? prev - 1 : prev + 1);
+      const rollback = getLikedIds();
+      if (newLiked) { rollback.delete(post.id); } else { rollback.add(post.id); }
+      saveLikedIds(rollback);
     }
   };
 

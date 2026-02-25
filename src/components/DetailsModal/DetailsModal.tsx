@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
 import type { Post } from '../../types/post';
 import t from '../../locales/ru.json';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface DetailsModalProps {
   post: Post;
@@ -8,16 +8,12 @@ interface DetailsModalProps {
 }
 
 function DetailsModal({ post, onClose }: DetailsModalProps) {
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
+  useScrollLock();
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4 overscroll-contain touch-none"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
-      onTouchMove={(e) => e.preventDefault()}
     >
       <div
         className="bg-[#373737] rounded-[20px] p-[clamp(16px,4vw,32px)] w-full max-w-[720px] flex flex-col gap-[clamp(12px,2vw,24px)] max-h-[70vh] relative"

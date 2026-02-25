@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import channelLogo from '../../assets/channelLogo.png';
 import t from '../../locales/ru.json';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface ChannelModalProps {
   onClose: () => void;
@@ -10,17 +11,12 @@ function ChannelModal({ onClose }: ChannelModalProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(211);
 
-  // Lock body scroll while modal is open
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
+  useScrollLock();
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4 overscroll-contain touch-none"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
-      onTouchMove={(e) => e.preventDefault()}
     >
       <div
         className="bg-[#373737] rounded-[20px] p-[clamp(8px,2vw,16px)] py-[clamp(14px,2vw,24px)] w-full max-w-[720px] flex flex-col items-center max-h-[70vh] relative"

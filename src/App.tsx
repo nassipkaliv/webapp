@@ -91,7 +91,7 @@ function App() {
   }, []);
 
   return (
-    <div className="mx-auto min-h-dvh relative overflow-hidden">
+    <div className="mx-auto h-dvh relative overflow-hidden">
       <div className={activeTab !== 'home' ? 'hidden' : ''}>
         <HomePage
           balance={balance}

@@ -10,12 +10,12 @@ function CoinHero({ onTap }: CoinHeroProps) {
       <img
         src={coinImage}
         alt="Euro coin"
-        className="w-[clamp(140px,35vh,400px)] h-auto relative z-[1] select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)] cursor-pointer active:scale-95 transition-transform duration-100 pointer-events-auto outline-none"
+        className="w-[clamp(140px,35vh,400px)] h-auto relative z-[1] select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)] cursor-pointer active:scale-95 transition-transform duration-100 pointer-events-auto outline-none focus:outline-none focus:ring-0"
         tabIndex={-1}
         draggable={false}
         onClick={onTap}
         onContextMenu={(e) => e.preventDefault()}
-        style={{ WebkitTouchCallout: 'none' } as React.CSSProperties}
+        style={{ WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' } as React.CSSProperties}
       />
     </div>
   );

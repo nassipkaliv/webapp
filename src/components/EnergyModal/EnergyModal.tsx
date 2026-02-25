@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import channelLogo from '../../assets/channelLogo.png';
 import t from '../../locales/ru.json';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface EnergyModalProps {
   onClose: () => void;
@@ -7,8 +9,12 @@ interface EnergyModalProps {
 }
 
 function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useScrollLock(modalRef);
+
   return (
     <div
+      ref={modalRef}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
     >

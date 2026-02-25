@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import channelLogo from '../../assets/channelLogo.png';
 import t from '../../locales/ru.json';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface ChannelModalProps {
   onClose: () => void;
@@ -9,9 +10,12 @@ interface ChannelModalProps {
 function ChannelModal({ onClose }: ChannelModalProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(211);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useScrollLock(modalRef);
 
   return (
     <div
+      ref={modalRef}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
     >

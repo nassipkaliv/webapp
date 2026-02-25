@@ -1,21 +1,32 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
- * Blocks scroll in data-scroll-allow containers while modal is open.
- * Global page scroll is already blocked by main.tsx touchmove handler.
+ * Blocks background scroll while modal is open on iOS Safari.
+ * Temporarily removes data-scroll-allow from elements OUTSIDE
+ * the modal so the global touchmove blocker catches them.
+ * Pass a ref to the modal container to exclude it.
  */
-export function useScrollLock() {
+export function useScrollLock(modalRef: React.RefObject<HTMLElement | null>) {
+  const blockedEls = useRef<Element[]>([]);
+
   useEffect(() => {
-    // Temporarily remove data-scroll-allow from all elements
-    // so the global touchmove blocker catches everything
-    const scrollables = document.querySelectorAll('[data-scroll-allow]');
-    scrollables.forEach(el => el.setAttribute('data-scroll-blocked', ''));
-    scrollables.forEach(el => el.removeAttribute('data-scroll-allow'));
+    const all = document.querySelectorAll('[data-scroll-allow]');
+    const modal = modalRef.current;
+
+    all.forEach(el => {
+      // Don't block scroll inside the modal itself
+      if (modal && modal.contains(el)) return;
+      el.setAttribute('data-scroll-blocked', '');
+      el.removeAttribute('data-scroll-allow');
+      blockedEls.current.push(el);
+    });
 
     return () => {
-      const blocked = document.querySelectorAll('[data-scroll-blocked]');
-      blocked.forEach(el => el.setAttribute('data-scroll-allow', ''));
-      blocked.forEach(el => el.removeAttribute('data-scroll-blocked'));
+      blockedEls.current.forEach(el => {
+        el.setAttribute('data-scroll-allow', '');
+        el.removeAttribute('data-scroll-blocked');
+      });
+      blockedEls.current = [];
     };
-  }, []);
+  }, [modalRef]);
 }

@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import type { Post } from '../../types/post';
 import t from '../../locales/ru.json';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface DetailsModalProps {
   post: Post;
@@ -7,8 +9,12 @@ interface DetailsModalProps {
 }
 
 function DetailsModal({ post, onClose }: DetailsModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useScrollLock(modalRef);
+
   return (
     <div
+      ref={modalRef}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
       onClick={onClose}
     >

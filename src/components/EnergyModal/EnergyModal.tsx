@@ -19,7 +19,7 @@ function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[clamp(16px,4vw,32px)] w-full max-w-[720px] flex flex-col items-center gap-[clamp(10px,1.5vw,20px)] relative"
+        className="bg-[#373737] rounded-[20px] p-[clamp(16px,4vw,32px)] w-full max-w-[720px] flex flex-col items-center gap-[clamp(10px,1.5vw,20px)] max-h-[85dvh] relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-all" onClick={onClose}>

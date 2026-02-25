@@ -11,19 +11,18 @@
   --font-sf: 'SF Pro', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-html {
+html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
-}
-
-body {
   font-family: var(--font-inter);
   background-color: var(--color-bg-primary);
   color: #fff;
-  overflow-x: hidden;
-  min-height: 100vh;
+  overflow: hidden;
+  height: 100%;
   overscroll-behavior: none;
+  position: fixed;
+  width: 100%;
 }
 
 @media (min-width: 431px) {

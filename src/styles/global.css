@@ -21,8 +21,6 @@ html, body {
   overflow: hidden;
   height: 100%;
   overscroll-behavior: none;
-  position: fixed;
-  width: 100%;
 }
 
 @media (min-width: 431px) {

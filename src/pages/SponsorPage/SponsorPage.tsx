@@ -91,7 +91,7 @@ function SponsorPage({ onTabChange, posts, postsLoading, loadingMore, postsError
   }, []);
 
   return (
-    <div ref={scrollContainerRef} className="h-dvh relative overflow-y-auto" style={{ background: 'linear-gradient(180deg, #000000 0%, #440D08 38%, #B42115 100%)' }}>
+    <div ref={scrollContainerRef} data-scroll-allow className="h-dvh relative overflow-y-auto" style={{ background: 'linear-gradient(180deg, #000000 0%, #440D08 38%, #B42115 100%)' }}>
       <div className="sticky top-0 z-[10] bg-[#190503] px-[clamp(12px,4vw,48px)] pt-4 pb-3">
         <div className="relative flex items-center justify-between">
           <button

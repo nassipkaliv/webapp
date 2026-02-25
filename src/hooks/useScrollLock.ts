@@ -1,38 +1,21 @@
 import { useEffect } from 'react';
 
 /**
- * Locks page scroll while active. Works on iOS Safari where
- * overflow:hidden on body is not enough.
+ * Blocks scroll in data-scroll-allow containers while modal is open.
+ * Global page scroll is already blocked by main.tsx touchmove handler.
  */
 export function useScrollLock() {
   useEffect(() => {
-    // Save current scroll position
-    const scrollY = window.scrollY;
-
-    // Lock body
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.overflow = 'hidden';
-
-    // Block touchmove on document level (iOS Safari needs { passive: false })
-    const preventTouch = (e: TouchEvent) => {
-      // Allow scroll inside modal content (elements with overflow-y-auto)
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-scroll-allow]')) return;
-      e.preventDefault();
-    };
-    document.addEventListener('touchmove', preventTouch, { passive: false });
+    // Temporarily remove data-scroll-allow from all elements
+    // so the global touchmove blocker catches everything
+    const scrollables = document.querySelectorAll('[data-scroll-allow]');
+    scrollables.forEach(el => el.setAttribute('data-scroll-blocked', ''));
+    scrollables.forEach(el => el.removeAttribute('data-scroll-allow'));
 
     return () => {
-      document.removeEventListener('touchmove', preventTouch);
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.overflow = '';
-      window.scrollTo(0, scrollY);
+      const blocked = document.querySelectorAll('[data-scroll-blocked]');
+      blocked.forEach(el => el.setAttribute('data-scroll-allow', ''));
+      blocked.forEach(el => el.removeAttribute('data-scroll-blocked'));
     };
   }, []);
 }

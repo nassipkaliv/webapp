@@ -68,3 +68,14 @@ button {
   pointer-events: auto !important;
   cursor: pointer !important;
 }
+
+@keyframes coinPulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  45% { transform: scale(1.12); filter: brightness(1.12); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.coin-pulse {
+  animation: coinPulse 220ms ease-out;
+  will-change: transform, filter;
+}

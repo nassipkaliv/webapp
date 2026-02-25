@@ -37,6 +37,19 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Landscape / short viewport adjustments for modals */
+@media (orientation: landscape) and (max-height: 500px) {
+  .modal-avatar {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 15px !important;
+  }
+  .modal-inner {
+    padding: 10px 12px !important;
+    gap: 6px !important;
+  }
+}
+
 /* Hyperlinks inside post content */
 .post-content a {
   color: #5eafff !important;

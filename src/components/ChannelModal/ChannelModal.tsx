@@ -20,7 +20,7 @@ function ChannelModal({ onClose }: ChannelModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[clamp(8px,2vw,16px)] py-[clamp(14px,2vw,24px)] w-full max-w-[720px] flex flex-col items-center max-h-[85dvh] relative"
+        className="modal-inner bg-[#373737] rounded-[20px] p-[clamp(8px,2vw,16px)] py-[clamp(14px,2vw,24px)] w-full max-w-[720px] flex flex-col items-center max-h-[85dvh] overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-all z-10" onClick={onClose}>
@@ -28,7 +28,7 @@ function ChannelModal({ onClose }: ChannelModalProps) {
             <path d="M1 1L15 15M15 1L1 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </button>
-        <div className="w-[117px] h-[117px] rounded-[29px] overflow-hidden shrink-0 mb-3">
+        <div className="modal-avatar w-[117px] h-[117px] rounded-[29px] overflow-hidden shrink-0 mb-3">
           <img
             src={channelLogo}
             alt={t.channelModal.actorAlt}
@@ -36,7 +36,7 @@ function ChannelModal({ onClose }: ChannelModalProps) {
           />
         </div>
 
-        <span className="font-inter font-bold text-[20px] text-white leading-[75%] mb-3">
+        <span className="font-inter font-bold text-[20px] text-white leading-[75%] mb-3 shrink-0">
           {t.channelModal.actorName}
         </span>
 

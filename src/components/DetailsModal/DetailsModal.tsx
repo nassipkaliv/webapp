@@ -19,7 +19,7 @@ function DetailsModal({ post, onClose }: DetailsModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-[#373737] rounded-[20px] p-[clamp(16px,4vw,32px)] w-full max-w-[720px] flex flex-col gap-[clamp(12px,2vw,24px)] max-h-[85dvh] relative"
+        className="modal-inner bg-[#373737] rounded-[20px] p-[clamp(16px,4vw,32px)] w-full max-w-[720px] flex flex-col gap-[clamp(12px,2vw,24px)] max-h-[85dvh] overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-all z-10" onClick={onClose}>

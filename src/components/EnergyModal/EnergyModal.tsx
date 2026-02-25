@@ -1,6 +1,5 @@
 import channelLogo from '../../assets/channelLogo.png';
 import t from '../../locales/ru.json';
-import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface EnergyModalProps {
   onClose: () => void;
@@ -8,8 +7,6 @@ interface EnergyModalProps {
 }
 
 function EnergyModal({ onClose, onUnlock }: EnergyModalProps) {
-  useScrollLock();
-
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"

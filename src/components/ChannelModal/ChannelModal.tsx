@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import channelLogo from '../../assets/channelLogo.png';
 import t from '../../locales/ru.json';
-import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface ChannelModalProps {
   onClose: () => void;
@@ -10,8 +9,6 @@ interface ChannelModalProps {
 function ChannelModal({ onClose }: ChannelModalProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(211);
-
-  useScrollLock();
 
   return (
     <div
@@ -39,7 +36,7 @@ function ChannelModal({ onClose }: ChannelModalProps) {
           {t.channelModal.actorName}
         </span>
 
-        <div className="flex-1 overflow-y-auto min-h-0 px-3">
+        <div className="flex-1 overflow-y-auto min-h-0 px-3" data-scroll-allow>
           <h3 className="font-inter font-semibold text-[20px] text-[#a6a6a6] leading-[110%] text-center mb-3">
             {t.channelModal.title}
           </h3>

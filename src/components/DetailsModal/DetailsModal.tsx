@@ -1,6 +1,5 @@
 import type { Post } from '../../types/post';
 import t from '../../locales/ru.json';
-import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface DetailsModalProps {
   post: Post;
@@ -8,8 +7,6 @@ interface DetailsModalProps {
 }
 
 function DetailsModal({ post, onClose }: DetailsModalProps) {
-  useScrollLock();
-
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 px-4"
@@ -24,7 +21,7 @@ function DetailsModal({ post, onClose }: DetailsModalProps) {
             <path d="M1 1L15 15M15 1L1 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </button>
-        <div className="flex-1 overflow-y-auto min-h-0 px-3 py-3">
+        <div className="flex-1 overflow-y-auto min-h-0 px-3 py-3" data-scroll-allow>
           <div
             className="post-content font-inter text-[14px] text-[#a6a6a6] leading-[140%] text-center"
             dangerouslySetInnerHTML={{ __html: post.detailsText || t.detailsModal.text1 }}
